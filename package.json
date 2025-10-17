@@ -1,0 +1,42 @@
+{
+  "name": "zkgame",
+  "version": "1.0.0",
+  "description": "Zero-knowledge proof-based simulation game with VDF integration",
+  "main": "index.js",
+  "scripts": {
+    "compile": "node scripts/compile-circuits.js",
+    "setup": "node scripts/generate-trusted-setup.js",
+    "deploy": "npx hardhat run scripts/deploy.js",
+    "test": "npm run test:circuits && npm run test:contracts",
+    "test:circuits": "mocha test/circuits/**/*.js",
+    "test:contracts": "npx hardhat test",
+    "test:integration": "npx hardhat test test/integration/**/*.js",
+    "demo": "node scripts/demo.js",
+    "build:vdf": "cd vdf && cargo build --release",
+    "build:cli": "cd cli && cargo build --release",
+    "build:all": "npm run build:vdf && npm run build:cli"
+  },
+  "dependencies": {
+    "circomlib": "^2.0.5",
+    "snarkjs": "^0.7.0",
+    "circom_tester": "^0.0.18",
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "hardhat": "^2.19.0",
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "zero-knowledge",
+    "plonk",
+    "vdf",
+    "blockchain",
+    "game",
+    "privacy"
+  ],
+  "author": "ZKGame Team",
+  "license": "MIT"
+}

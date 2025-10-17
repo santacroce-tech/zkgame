@@ -1,0 +1,65 @@
+{
+  "recipes": [
+    {
+      "id": 1,
+      "name": "iron_sword",
+      "required_materials": [
+        {"item_type": "iron_ore", "quantity": 3},
+        {"item_type": "wood", "quantity": 1}
+      ],
+      "output_item": {"type": "iron_sword", "quantity": 1},
+      "required_time_seconds": 3600,
+      "experience_reward": 100,
+      "skill_level_requirement": 1
+    },
+    {
+      "id": 2,
+      "name": "steel_armor",
+      "required_materials": [
+        {"item_type": "steel_ingot", "quantity": 5},
+        {"item_type": "leather", "quantity": 2}
+      ],
+      "output_item": {"type": "steel_armor", "quantity": 1},
+      "required_time_seconds": 7200,
+      "experience_reward": 250,
+      "skill_level_requirement": 3
+    },
+    {
+      "id": 3,
+      "name": "magic_potion",
+      "required_materials": [
+        {"item_type": "herb", "quantity": 2},
+        {"item_type": "water", "quantity": 1},
+        {"item_type": "crystal", "quantity": 1}
+      ],
+      "output_item": {"type": "magic_potion", "quantity": 3},
+      "required_time_seconds": 1800,
+      "experience_reward": 75,
+      "skill_level_requirement": 2
+    },
+    {
+      "id": 4,
+      "name": "golden_ring",
+      "required_materials": [
+        {"item_type": "gold_ingot", "quantity": 2},
+        {"item_type": "gem", "quantity": 1}
+      ],
+      "output_item": {"type": "golden_ring", "quantity": 1},
+      "required_time_seconds": 10800,
+      "experience_reward": 500,
+      "skill_level_requirement": 5
+    },
+    {
+      "id": 5,
+      "name": "basic_tool",
+      "required_materials": [
+        {"item_type": "iron_ore", "quantity": 1},
+        {"item_type": "wood", "quantity": 1}
+      ],
+      "output_item": {"type": "basic_tool", "quantity": 1},
+      "required_time_seconds": 900,
+      "experience_reward": 25,
+      "skill_level_requirement": 1
+    }
+  ]
+}

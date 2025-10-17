@@ -1,0 +1,49 @@
+{
+  "movement": {
+    "cost_per_step": 1,
+    "xp_per_step": 10,
+    "max_distance_per_move": 1
+  },
+  "rewards": {
+    "base_rate_per_hour": 100,
+    "max_claim_interval_hours": 24,
+    "reputation_multiplier_base": 1.0
+  },
+  "inventory": {
+    "max_slots": 64,
+    "max_stores_per_player": 10
+  },
+  "crafting": {
+    "xp_multiplier": 1.5,
+    "min_skill_level": 1
+  },
+  "stores": {
+    "purchase_prices": {
+      "tier_1_city": 1000,
+      "tier_2_city": 5000,
+      "tier_3_city": 25000
+    },
+    "max_inventory_slots": 256,
+    "reputation_decay_rate": 0.01
+  },
+  "resources": {
+    "regeneration_rate_per_hour": 10,
+    "gathering_cooldown_seconds": 300,
+    "max_resources_per_location": 1000
+  },
+  "travel": {
+    "cost_per_distance_unit": 5,
+    "fuel_cost_per_distance": 2,
+    "max_travel_distance": 100
+  },
+  "building": {
+    "storage_upgrade_time_hours": 2,
+    "prestige_upgrade_time_hours": 4,
+    "storefront_upgrade_time_hours": 8,
+    "expansion_upgrade_time_hours": 24,
+    "storage_upgrade_cost": 500,
+    "prestige_upgrade_cost": 2000,
+    "storefront_upgrade_cost": 10000,
+    "expansion_upgrade_cost": 50000
+  }
+}

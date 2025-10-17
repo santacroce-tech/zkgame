@@ -1,0 +1,30 @@
+{
+  "max_array_sizes": {
+    "inventory_slots": 64,
+    "store_list": 10,
+    "recipe_materials": 8,
+    "location_stores": 20,
+    "explored_cells": 1000
+  },
+  "field_element_sizes": {
+    "player_id_bits": 64,
+    "position_bits": 32,
+    "currency_bits": 128,
+    "timestamp_bits": 64,
+    "nonce_bits": 64
+  },
+  "hash_functions": {
+    "poseidon": true,
+    "sha256": false
+  },
+  "merkle_trees": {
+    "explored_cells_depth": 10,
+    "inventory_depth": 6,
+    "store_list_depth": 4
+  },
+  "vdf": {
+    "iterations_per_second": 278,
+    "max_iterations": 100000000,
+    "proof_size_bits": 2048
+  }
+}
