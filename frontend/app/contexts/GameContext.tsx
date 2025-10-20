@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, ReactNode } from 'react'
-import { useGameStore } from './stores/gameStore'
+import { useGameStore } from '../stores/gameStore'
 
 interface GameContextType {
   // State

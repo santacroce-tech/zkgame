@@ -1,9 +1,5 @@
-import type { NextConfig } from 'next'
-
-const nextConfig: NextConfig = {
-  experimental: {
-    appDir: true,
-  },
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   webpack: (config) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
@@ -15,4 +11,4 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+module.exports = nextConfig
