@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
-use zkgame_vdf::{VDFEngine, VDFInput, VDFOutput};
+use zkgame_vdf::VDFInput;
 
 /// ZKGame CLI - Zero-knowledge proof-based simulation game
 #[derive(Parser)]
@@ -65,6 +65,13 @@ enum Commands {
         #[arg(short, long)]
         action: String,
     },
+    /// Gather resources from current location
+    Gather {
+        #[arg(short, long)]
+        resource_type: String,
+        #[arg(short, long, default_value = "1")]
+        quantity: u32,
+    },
     /// Show player status
     Status,
 }
@@ -93,7 +100,7 @@ struct Position {
     y: i32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct CraftInProgress {
     craft_id: String,
     recipe_name: String,
@@ -137,6 +144,9 @@ fn main() {
         }
         Commands::ManageStore { store_id, action } => {
             manage_store(store_id, &action);
+        }
+        Commands::Gather { resource_type, quantity } => {
+            gather_resources(&resource_type, quantity);
         }
         Commands::Status => {
             show_status();
@@ -224,8 +234,13 @@ fn move_player(x: i32, y: i32) {
             state.explored_cells.push(new_pos);
         }
         
-        // In production, generate and submit proof here
-        println!("Movement proof generated and submitted to contract");
+        // Generate movement proof
+        let proof_path = generate_movement_proof(state, x, y);
+        println!("📄 Movement proof generated: {}", proof_path);
+        
+        // Submit to smart contract
+        let tx_hash = submit_movement_proof(&proof_path);
+        println!("🔗 Smart contract transaction: {}", tx_hash);
         
         save_config(&config);
         println!("Moved successfully! New position: ({}, {})", x, y);
@@ -253,11 +268,17 @@ fn claim_rewards() {
         state.last_claim_time = current_time;
         state.nonce += 1;
         
-        // In production, generate and submit proof here
-        println!("Reward claim proof generated and submitted to contract");
+        // Generate reward claim proof
+        let proof_path = generate_reward_proof(state, reward as u64);
+        println!("📄 Reward claim proof generated: {}", proof_path);
         
+        // Submit to smart contract
+        let tx_hash = submit_reward_proof(&proof_path);
+        println!("🔗 Smart contract transaction: {}", tx_hash);
+        
+        let total_currency = state.currency;
         save_config(&config);
-        println!("Claimed {} currency! Total: {}", reward as u64, state.currency);
+        println!("Claimed {} currency! Total: {}", reward as u64, total_currency);
     } else {
         println!("Error: Player not initialized");
     }
@@ -319,7 +340,8 @@ fn complete_craft(craft_id: &str) {
     let mut config = load_config();
     
     if let Some(craft_index) = config.active_crafts.iter().position(|c| c.craft_id == craft_id) {
-        let craft = &config.active_crafts[craft_index];
+        // Clone the craft data before removing it
+        let craft = config.active_crafts[craft_index].clone();
         
         // Check if enough time has passed
         let current_time = get_current_timestamp();
@@ -360,7 +382,7 @@ fn trade_with_store(store_id: u64, action: &str, item: &str, quantity: u32) {
     println!("Trade completed successfully!");
 }
 
-fn buy_store(city: &str, price: u64) {
+fn buy_store(_city: &str, price: u64) {
     let mut config = load_config();
     
     if let Some(ref mut state) = config.player_state {
@@ -415,6 +437,19 @@ fn show_status() {
         println!("Owned Stores: {}", state.owned_stores.len());
         println!("Explored Cells: {}", state.explored_cells.len());
         println!("Active Crafts: {}", config.active_crafts.len());
+        
+        // Display inventory
+        if !state.inventory.is_empty() {
+            println!("\n=== Inventory ===");
+            for (item, quantity) in &state.inventory {
+                if !item.starts_with("last_gather_") { // Skip cooldown tracking items
+                    println!("- {}: {}", item, quantity);
+                }
+            }
+        } else {
+            println!("\n=== Inventory ===");
+            println!("Empty");
+        }
         
         if !config.active_crafts.is_empty() {
             println!("\n=== Active Crafts ===");
@@ -511,10 +546,68 @@ struct ItemOutput {
 }
 
 fn load_recipe(name: &str) -> Option<Recipe> {
-    // In production, load from config/recipes.json
-    // For now, return a sample recipe
-    if name == "iron_sword" {
-        Some(Recipe {
+    // Load recipes from config/recipes.json
+    let recipes_path = PathBuf::from("config/recipes.json");
+    if let Ok(content) = fs::read_to_string(&recipes_path) {
+        if let Ok(recipes_data) = serde_json::from_str::<serde_json::Value>(&content) {
+            if let Some(recipes) = recipes_data.get("recipes").and_then(|r| r.as_array()) {
+                for recipe in recipes {
+                    if let Some(recipe_name) = recipe.get("name").and_then(|n| n.as_str()) {
+                        if recipe_name == name {
+                            // Convert the recipe JSON to our Recipe struct
+                            if let (Some(id), Some(materials), Some(output), Some(time), Some(xp), Some(skill)) = (
+                                recipe.get("id").and_then(|i| i.as_u64()),
+                                recipe.get("required_materials").and_then(|m| m.as_array()),
+                                recipe.get("output_item"),
+                                recipe.get("required_time_seconds").and_then(|t| t.as_u64()),
+                                recipe.get("experience_reward").and_then(|e| e.as_u64()),
+                                recipe.get("skill_level_requirement").and_then(|s| s.as_u64())
+                            ) {
+                                let required_materials: Vec<MaterialRequirement> = materials
+                                    .iter()
+                                    .filter_map(|m| {
+                                        if let (Some(item_type), Some(quantity)) = (
+                                            m.get("item_type").and_then(|t| t.as_str()),
+                                            m.get("quantity").and_then(|q| q.as_u64())
+                                        ) {
+                                            Some(MaterialRequirement {
+                                                item_type: item_type.to_string(),
+                                                quantity: quantity as u32,
+                                            })
+                                        } else {
+                                            None
+                                        }
+                                    })
+                                    .collect();
+                                
+                                if let (Some(output_type), Some(output_quantity)) = (
+                                    output.get("type").and_then(|t| t.as_str()),
+                                    output.get("quantity").and_then(|q| q.as_u64())
+                                ) {
+                                    return Some(Recipe {
+                                        id,
+                                        name: recipe_name.to_string(),
+                                        required_materials,
+                                        output_item: ItemOutput {
+                                            type_name: output_type.to_string(),
+                                            quantity: output_quantity as u32,
+                                        },
+                                        required_time_seconds: time,
+                                        experience_reward: xp,
+                                        skill_level_requirement: skill,
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // Fallback to hardcoded recipes if file loading fails
+    match name {
+        "iron_sword" => Some(Recipe {
             id: 1,
             name: "iron_sword".to_string(),
             required_materials: vec![
@@ -525,9 +618,20 @@ fn load_recipe(name: &str) -> Option<Recipe> {
             required_time_seconds: 3600,
             experience_reward: 100,
             skill_level_requirement: 1,
-        })
-    } else {
-        None
+        }),
+        "basic_tool" => Some(Recipe {
+            id: 5,
+            name: "basic_tool".to_string(),
+            required_materials: vec![
+                MaterialRequirement { item_type: "iron_ore".to_string(), quantity: 1 },
+                MaterialRequirement { item_type: "wood".to_string(), quantity: 1 },
+            ],
+            output_item: ItemOutput { type_name: "basic_tool".to_string(), quantity: 1 },
+            required_time_seconds: 900,
+            experience_reward: 25,
+            skill_level_requirement: 1,
+        }),
+        _ => None,
     }
 }
 
@@ -547,4 +651,140 @@ fn consume_materials(state: &mut PlayerState, materials: &[MaterialRequirement])
 
 fn add_item_to_inventory(state: &mut PlayerState, item_type: &str, quantity: u32) {
     *state.inventory.entry(item_type.to_string()).or_insert(0) += quantity;
+}
+
+fn gather_resources(resource_type: &str, quantity: u32) {
+    let mut config = load_config();
+    
+    if let Some(ref mut state) = config.player_state {
+        println!("🔍 Gathering {} {} from current location...", quantity, resource_type);
+        
+        // Check cooldown (5 minutes = 300 seconds)
+        let current_time = get_current_timestamp();
+        let last_gather_key = format!("last_gather_{}", resource_type);
+        let last_gather = state.inventory.get(&last_gather_key).unwrap_or(&0);
+        
+        if current_time - (*last_gather as u64) < 300 {
+            let remaining = 300 - (current_time - (*last_gather as u64));
+            println!("⏰ Resource gathering cooldown active. {} seconds remaining", remaining);
+            return;
+        }
+        
+        // Generate resource gathering proof
+        let proof_path = generate_resource_gathering_proof(state, resource_type, quantity);
+        println!("📄 Resource gathering proof generated: {}", proof_path);
+        
+        // Submit to smart contract
+        let tx_hash = submit_resource_gathering_proof(&proof_path);
+        println!("🔗 Smart contract transaction: {}", tx_hash);
+        
+        // Add resources to inventory
+        add_item_to_inventory(state, resource_type, quantity);
+        state.inventory.insert(last_gather_key, current_time as u32);
+        state.experience += quantity as u64 * 5; // 5 XP per resource
+        state.nonce += 1;
+        
+        save_config(&config);
+        println!("✅ Gathered {} {}! Added to inventory.", quantity, resource_type);
+    } else {
+        println!("Error: Player not initialized");
+    }
+}
+
+// Proof generation functions (stubs for now)
+fn generate_movement_proof(state: &PlayerState, x: i32, y: i32) -> String {
+    let timestamp = get_current_timestamp();
+    let proof_filename = format!("movement_proof_{}_{}_{}.json", state.player_id, timestamp, state.nonce);
+    let proof_path = format!("proofs/{}", proof_filename);
+    
+    // Create proofs directory if it doesn't exist
+    std::fs::create_dir_all("proofs").unwrap_or_default();
+    
+    // Generate proof data (simplified for now)
+    let proof_data = serde_json::json!({
+        "circuit": "movement",
+        "public_signals": [
+            format!("{:064x}", state.player_id), // old commitment
+            format!("{:064x}", state.player_id + 1), // new commitment  
+            timestamp
+        ],
+        "timestamp": timestamp,
+        "player_id": state.player_id,
+        "from_position": {"x": state.position.x, "y": state.position.y},
+        "to_position": {"x": x, "y": y}
+    });
+    
+    std::fs::write(&proof_path, serde_json::to_string_pretty(&proof_data).unwrap()).unwrap();
+    proof_path
+}
+
+fn generate_reward_proof(state: &PlayerState, reward_amount: u64) -> String {
+    let timestamp = get_current_timestamp();
+    let proof_filename = format!("reward_proof_{}_{}_{}.json", state.player_id, timestamp, state.nonce);
+    let proof_path = format!("proofs/{}", proof_filename);
+    
+    std::fs::create_dir_all("proofs").unwrap_or_default();
+    
+    let proof_data = serde_json::json!({
+        "circuit": "timeReward",
+        "public_signals": [
+            format!("{:064x}", state.player_id),
+            format!("{:064x}", state.player_id + 1),
+            timestamp,
+            reward_amount
+        ],
+        "timestamp": timestamp,
+        "player_id": state.player_id,
+        "last_claim_time": state.last_claim_time,
+        "reward_amount": reward_amount
+    });
+    
+    std::fs::write(&proof_path, serde_json::to_string_pretty(&proof_data).unwrap()).unwrap();
+    proof_path
+}
+
+fn generate_resource_gathering_proof(state: &PlayerState, resource_type: &str, quantity: u32) -> String {
+    let timestamp = get_current_timestamp();
+    let proof_filename = format!("gather_proof_{}_{}_{}_{}.json", state.player_id, resource_type, timestamp, state.nonce);
+    let proof_path = format!("proofs/{}", proof_filename);
+    
+    std::fs::create_dir_all("proofs").unwrap_or_default();
+    
+    let proof_data = serde_json::json!({
+        "circuit": "resourceGather",
+        "public_signals": [
+            format!("{:064x}", state.player_id),
+            format!("{:064x}", state.player_id + 1),
+            format!("{:064x}", 0), // location commitment
+            format!("{:064x}", 1)  // new location commitment
+        ],
+        "timestamp": timestamp,
+        "player_id": state.player_id,
+        "location": {"x": state.position.x, "y": state.position.y},
+        "resource_type": resource_type,
+        "quantity": quantity
+    });
+    
+    std::fs::write(&proof_path, serde_json::to_string_pretty(&proof_data).unwrap()).unwrap();
+    proof_path
+}
+
+// Smart contract submission functions (stubs for now)
+fn submit_movement_proof(_proof_path: &str) -> String {
+    // In production, this would call the smart contract
+    let tx_hash = format!("0x{:064x}", get_current_timestamp());
+    println!("📤 Submitting movement proof to GameCore.move()...");
+    tx_hash
+}
+
+fn submit_reward_proof(_proof_path: &str) -> String {
+    let tx_hash = format!("0x{:064x}", get_current_timestamp());
+    println!("📤 Submitting reward proof to GameCore.claimReward()...");
+    tx_hash
+}
+
+fn submit_resource_gathering_proof(_proof_path: &str) -> String {
+    let tx_hash = format!("0x{:064x}", get_current_timestamp());
+    println!("📤 Submitting resource gathering proof to GameCore.gatherResources()...");
+    tx_hash
 }

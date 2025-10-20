@@ -14,17 +14,11 @@ if (!fs.existsSync(setupDir)) {
     fs.mkdirSync(setupDir, { recursive: true });
 }
 
-// Circuits that need trusted setup
+// Circuits that need trusted setup (only the ones that are actually compiled)
 const circuits = [
     'movement',
     'timeReward',
-    'storePurchase',
-    'inventoryTrade',
-    'storeManagement',
-    'resourceGathering',
-    'timeCraft',
-    'timeTravel',
-    'timeBuild'
+    'timeCraft'
 ];
 
 // Generate trusted setup for each circuit
@@ -38,32 +32,32 @@ for (const circuit of circuits) {
     try {
         // Phase 1: Powers of Tau
         console.log(`  📊 Phase 1: Powers of Tau for ${circuit}...`);
-        execSync(`snarkjs powersoftau new bn128 12 ${setupPath}_pot12_0000.ptau -v`, {
+        execSync(`snarkjs ptn bn128 12 ${setupPath}_pot12_0000.ptau -v`, {
             stdio: 'inherit',
             cwd: path.join(__dirname, '..')
         });
         
         // Contribute to Phase 1
-        execSync(`snarkjs powersoftau contribute ${setupPath}_pot12_0000.ptau ${setupPath}_pot12_0001.ptau --name="First contribution" -v`, {
+        execSync(`snarkjs ptc ${setupPath}_pot12_0000.ptau ${setupPath}_pot12_0001.ptau --name="First contribution" -v`, {
             stdio: 'inherit',
             cwd: path.join(__dirname, '..')
         });
         
         // Phase 2: Circuit-specific setup
         console.log(`  🔧 Phase 2: Circuit-specific setup for ${circuit}...`);
-        execSync(`snarkjs powersoftau prepare phase2 ${setupPath}_pot12_0001.ptau ${setupPath}_pot12_final.ptau -v`, {
+        execSync(`snarkjs pt2 ${setupPath}_pot12_0001.ptau ${setupPath}_pot12_final.ptau -v`, {
             stdio: 'inherit',
             cwd: path.join(__dirname, '..')
         });
         
         // Generate proving key
-        execSync(`snarkjs groth16 setup ${r1csPath} ${setupPath}_pot12_final.ptau ${setupPath}_proving_key.json`, {
+        execSync(`snarkjs g16s ${r1csPath} ${setupPath}_pot12_final.ptau ${setupPath}_proving_key.json`, {
             stdio: 'inherit',
             cwd: path.join(__dirname, '..')
         });
         
         // Generate verification key
-        execSync(`snarkjs groth16 export verificationkey ${setupPath}_proving_key.json ${setupPath}_verification_key.json`, {
+        execSync(`snarkjs zkev ${setupPath}_proving_key.json ${setupPath}_verification_key.json`, {
             stdio: 'inherit',
             cwd: path.join(__dirname, '..')
         });

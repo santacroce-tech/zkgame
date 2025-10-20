@@ -3,7 +3,7 @@
 //! This module implements a VDF based on repeated squaring modulo RSA-2048,
 //! providing computational proof of time passage for time-locked game actions.
 
-use rug::{Integer, integer::IsPrime};
+use rug::{Integer, ops::Pow};
 use sha2::{Sha256, Digest};
 use serde::{Serialize, Deserialize};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -105,13 +105,13 @@ impl VDFEngine {
         
         // Calculate remainder: r = 2^iterations mod l
         let two = Integer::from(2);
-        let remainder = two.pow_mod(&Integer::from(iterations), &challenge)
+        let _remainder = two.clone().pow_mod(&Integer::from(iterations), &challenge)
             .map_err(|e| format!("Modular exponentiation error: {}", e))?;
         
         // Generate proof: pi = input^(2^iterations / l) mod modulus
         let quotient = Integer::from(iterations) / &challenge;
         let exponent = two.pow(quotient.to_u32().unwrap_or(0));
-        let proof = input.pow_mod(&exponent, &self.modulus)
+        let proof = input.clone().pow_mod(&exponent, &self.modulus)
             .map_err(|e| format!("Proof generation error: {}", e))?;
         
         Ok(proof.to_string_radix(10))
@@ -124,13 +124,13 @@ impl VDFEngine {
         
         // Calculate remainder: r = 2^iterations mod l
         let two = Integer::from(2);
-        let remainder = two.pow_mod(&Integer::from(iterations), &challenge)
+        let remainder = two.clone().pow_mod(&Integer::from(iterations), &challenge)
             .map_err(|e| format!("Modular exponentiation error: {}", e))?;
         
         // Verify equation: input^r × pi^l ≡ output (mod modulus)
-        let left_side = (input.pow_mod(&remainder, &self.modulus)
+        let left_side = (input.clone().pow_mod(&remainder, &self.modulus)
             .map_err(|e| format!("Left side computation error: {}", e))?
-            * proof.pow_mod(&challenge, &self.modulus)
+            * proof.clone().pow_mod(&challenge, &self.modulus)
             .map_err(|e| format!("Right side computation error: {}", e))?) % &self.modulus;
         
         Ok(left_side == *output)
@@ -152,7 +152,7 @@ impl VDFEngine {
         }
         
         // Find next prime
-        while !candidate.is_probably_prime(10) {
+        while candidate.is_probably_prime(10) != rug::integer::IsPrime::Yes {
             candidate += 2;
         }
         

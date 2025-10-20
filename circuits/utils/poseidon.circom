@@ -27,5 +27,5 @@ template PoseidonHash(nInputs) {
         sum += inputs[i];
     }
     
-    out <== sum % 21888242871839275222246405745257275088548364400416034343698204186575808495617;
+    out <== sum;
 }

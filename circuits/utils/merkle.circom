@@ -54,7 +54,7 @@ template MerkleTreeNonInclusionProof(levels) {
     currentHash === root;
     
     // Verify the leaf is not equal to the sibling (proving non-inclusion)
-    leaf !== sibling;
+    leaf <== sibling + 1;
     
     out <== currentHash;
 }

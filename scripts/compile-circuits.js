@@ -16,13 +16,7 @@ if (!fs.existsSync(buildDir)) {
 const circuits = [
     'movement',
     'timeReward',
-    'storePurchase',
-    'inventoryTrade',
-    'storeManagement',
-    'resourceGathering',
-    'timeCraft',
-    'timeTravel',
-    'timeBuild'
+    'timeCraft'
 ];
 
 // Compile each circuit

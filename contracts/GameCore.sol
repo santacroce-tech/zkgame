@@ -34,7 +34,9 @@ contract GameCore {
     
     /**
      * @dev Move player to new position
-     * @param proof The movement proof data
+     * @param a First part of the proof
+     * @param b Second part of the proof
+     * @param c Third part of the proof
      * @param publicSignals The public signals for the proof
      */
     function move(
@@ -66,7 +68,9 @@ contract GameCore {
     
     /**
      * @dev Claim time-based rewards
-     * @param proof The time reward proof data
+     * @param a First part of the proof
+     * @param b Second part of the proof
+     * @param c Third part of the proof
      * @param publicSignals The public signals for the proof
      */
     function claimReward(
@@ -102,7 +106,9 @@ contract GameCore {
     
     /**
      * @dev Craft item with time-locked proof
-     * @param proof The craft proof data
+     * @param a First part of the proof
+     * @param b Second part of the proof
+     * @param c Third part of the proof
      * @param publicSignals The public signals for the proof
      */
     function craftItem(
@@ -136,7 +142,9 @@ contract GameCore {
     
     /**
      * @dev Purchase a store at current location
-     * @param proof The store purchase proof data
+     * @param a First part of the proof
+     * @param b Second part of the proof
+     * @param c Third part of the proof
      * @param publicSignals The public signals for the proof
      */
     function purchaseStore(
@@ -175,7 +183,9 @@ contract GameCore {
     
     /**
      * @dev Trade with a store
-     * @param proof The trade proof data
+     * @param a First part of the proof
+     * @param b Second part of the proof
+     * @param c Third part of the proof
      * @param publicSignals The public signals for the proof
      */
     function tradeWithStore(
@@ -210,7 +220,9 @@ contract GameCore {
     
     /**
      * @dev Manage store operations
-     * @param proof The store management proof data
+     * @param a First part of the proof
+     * @param b Second part of the proof
+     * @param c Third part of the proof
      * @param publicSignals The public signals for the proof
      */
     function manageStore(
@@ -242,7 +254,9 @@ contract GameCore {
     
     /**
      * @dev Gather resources from current location
-     * @param proof The resource gathering proof data
+     * @param a First part of the proof
+     * @param b Second part of the proof
+     * @param c Third part of the proof
      * @param publicSignals The public signals for the proof
      */
     function gatherResources(
@@ -276,7 +290,9 @@ contract GameCore {
     
     /**
      * @dev Travel to distant location with time-lock proof
-     * @param proof The travel proof data
+     * @param a First part of the proof
+     * @param b Second part of the proof
+     * @param c Third part of the proof
      * @param publicSignals The public signals for the proof
      */
     function travelToLocation(
