@@ -4,6 +4,36 @@
     "xp_per_step": 10,
     "max_distance_per_move": 1
   },
+  "macro_map": {
+    "area_types": {
+      "street": {
+        "id": 1,
+        "name": "Street",
+        "max_connections": 4,
+        "movement_cost": 1,
+        "xp_reward": 5
+      },
+      "city": {
+        "id": 2,
+        "name": "City", 
+        "max_connections": 8,
+        "movement_cost": 3,
+        "xp_reward": 15
+      },
+      "country": {
+        "id": 3,
+        "name": "Country",
+        "max_connections": 12,
+        "movement_cost": 5,
+        "xp_reward": 30
+      }
+    },
+    "max_areas_per_type": {
+      "streets": 100,
+      "cities": 20,
+      "countries": 5
+    }
+  },
   "rewards": {
     "base_rate_per_hour": 100,
     "max_claim_interval_hours": 24,

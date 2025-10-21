@@ -17,6 +17,10 @@ module.exports = {
     },
     localhost: {
       url: "http://127.0.0.1:8545"
+    },
+    mainnet: {
+      url: "https://cloudflare-eth.com",
+      chainId: 1
     }
   },
   paths: {

@@ -14,19 +14,27 @@
     "demo": "node scripts/demo.js",
     "build:vdf": "cd vdf && cargo build --release",
     "build:cli": "cd cli && cargo build --release",
-    "build:all": "npm run build:vdf && npm run build:cli"
+    "build:all": "npm run build:vdf && npm run build:cli",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:full": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm install",
+    "start:game": "npm run dev:full",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install"
   },
   "dependencies": {
-    "circomlib": "^2.0.5",
-    "snarkjs": "^0.7.0",
-    "circom_tester": "^0.0.18",
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "chai": "^4.3.7",
-    "mocha": "^10.2.0",
+    "circom_tester": "^0.0.18",
+    "circomlib": "^2.0.5",
     "hardhat": "^2.19.0",
-    "@nomicfoundation/hardhat-toolbox": "^3.0.0"
+    "mocha": "^10.2.0",
+    "snarkjs": "^0.7.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "concurrently": "^8.2.2",
     "typescript": "^5.0.0"
   },
   "keywords": [
