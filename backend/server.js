@@ -4,6 +4,7 @@ const { Server } = require('socket.io')
 const cors = require('cors')
 const { ethers } = require('ethers')
 const path = require('path')
+const snarkjs = require('snarkjs')
 
 const app = express()
 const server = createServer(app)
@@ -28,6 +29,21 @@ const CONTRACT_ADDRESSES = {
 // Connect to local Hardhat network
 const provider = new ethers.JsonRpcProvider('http://127.0.0.1:8545')
 
+// Load verification keys for proof verification
+const loadVerificationKey = async (circuitName) => {
+  try {
+    const vkeyPath = path.join(__dirname, '..', 'setup', `${circuitName}_verification_key.json`)
+    const vkey = require(vkeyPath)
+    return vkey
+  } catch (error) {
+    console.error(`Failed to load verification key for ${circuitName}:`, error)
+    return null
+  }
+}
+
+// Load verification keys
+const verificationKeys = {}
+
 // Load contract ABIs
 const gameCoreABI = require('../artifacts/contracts/GameCore.sol/GameCore.json').abi
 const stateManagerABI = require('../artifacts/contracts/StateManager.sol/StateManager.json').abi
@@ -37,6 +53,25 @@ const proofVerifierABI = require('../artifacts/contracts/ProofVerifier.sol/Proof
 const gameCore = new ethers.Contract(CONTRACT_ADDRESSES.GameCore, gameCoreABI, provider)
 const stateManager = new ethers.Contract(CONTRACT_ADDRESSES.StateManager, stateManagerABI, provider)
 const proofVerifier = new ethers.Contract(CONTRACT_ADDRESSES.ProofVerifier, proofVerifierABI, provider)
+
+// Initialize verification keys
+const initializeVerificationKeys = async () => {
+  console.log('🔑 [Backend] Initializing verification keys...')
+  const circuits = ['movement', 'timeReward', 'timeCraft']
+  for (const circuit of circuits) {
+    console.log(`📁 [Backend] Loading verification key for ${circuit}...`)
+    verificationKeys[circuit] = await loadVerificationKey(circuit)
+    if (verificationKeys[circuit]) {
+      console.log(`✅ [Backend] ${circuit} verification key loaded successfully`)
+    } else {
+      console.error(`❌ [Backend] Failed to load ${circuit} verification key`)
+    }
+  }
+  console.log('🔑 [Backend] Verification keys loaded:', Object.keys(verificationKeys))
+}
+
+// Initialize verification keys on startup
+initializeVerificationKeys()
 
 // Store connected players
 const connectedPlayers = new Map()
@@ -127,19 +162,78 @@ app.get('/api/players', (req, res) => {
 
 app.post('/api/game/move', async (req, res) => {
   try {
-    const { playerId, fromX, fromY, toX, toY, proof } = req.body
+    console.log('🎮 [Backend] Received move request')
+    console.log('📥 [Backend] Request body:', {
+      playerId: req.body.playerId,
+      fromX: req.body.fromX,
+      fromY: req.body.fromY,
+      toX: req.body.toX,
+      toY: req.body.toY,
+      hasProof: !!req.body.proof,
+      hasPublicSignals: !!req.body.publicSignals,
+      publicSignalsLength: req.body.publicSignals?.length
+    })
     
-    // In a real implementation, you would:
-    // 1. Verify the proof using snarkjs
-    // 2. Submit the transaction to the smart contract
-    // 3. Wait for confirmation
+    const { playerId, fromX, fromY, toX, toY, proof, publicSignals } = req.body
     
-    console.log('Move request:', { playerId, fromX, fromY, toX, toY })
+    console.log('📍 [Backend] Movement details:', { 
+      playerId, 
+      from: { x: fromX, y: fromY }, 
+      to: { x: toX, y: toY } 
+    })
     
+    // Verify the proof if provided
+    if (proof && publicSignals) {
+      console.log('🔍 [Backend] Verifying movement proof...')
+      console.log('📊 [Backend] Proof structure:', {
+        pi_a_length: proof.pi_a?.length,
+        pi_b_length: proof.pi_b?.length,
+        pi_c_length: proof.pi_c?.length,
+        publicSignals_length: publicSignals.length,
+        publicSignals: publicSignals
+      })
+      
+      const vkey = verificationKeys.movement
+      if (!vkey) {
+        console.error('❌ [Backend] Movement verification key not loaded')
+        throw new Error('Movement verification key not loaded')
+      }
+      
+      console.log('🔑 [Backend] Verification key loaded, verifying proof...')
+      const isValid = await snarkjs.groth16.verify(vkey, publicSignals, proof)
+      console.log('✅ [Backend] Proof verification result:', isValid)
+      
+      if (!isValid) {
+        console.error('❌ [Backend] Invalid movement proof')
+        throw new Error('Invalid movement proof')
+      }
+      
+      console.log('✅ [Backend] Movement proof verified successfully')
+    } else {
+      console.log('⚠️ [Backend] No proof provided, skipping verification')
+    }
+    
+    // In a real implementation, you would submit to the smart contract
     // For now, just return success
-    res.json({ success: true, transactionHash: '0x' + Date.now().toString(16) })
+    const transactionHash = '0x' + Date.now().toString(16)
+    console.log('📤 [Backend] Returning success response:', {
+      success: true,
+      transactionHash,
+      proofVerified: !!proof
+    })
+    
+    res.json({ 
+      success: true, 
+      transactionHash,
+      proofVerified: !!proof
+    })
   } catch (error) {
-    console.error('Move error:', error)
+    console.error('❌ [Backend] Move error:', error)
+    console.error('📋 [Backend] Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    })
     res.status(500).json({ error: error.message })
   }
 })
@@ -197,7 +291,10 @@ app.get('*', (req, res) => {
 const PORT = process.env.PORT || 3001
 
 server.listen(PORT, () => {
-  console.log(`🚀 ZKGame backend server running on port ${PORT}`)
-  console.log(`📡 WebSocket server ready for connections`)
-  console.log(`🔗 Contract addresses:`, CONTRACT_ADDRESSES)
+  console.log('🚀 [Backend] ZKGame backend server starting...')
+  console.log(`🌐 [Backend] Server running on port ${PORT}`)
+  console.log(`📡 [Backend] WebSocket server ready for connections`)
+  console.log(`🔗 [Backend] Contract addresses:`, CONTRACT_ADDRESSES)
+  console.log(`📊 [Backend] Provider connected to:`, provider.connection?.url || 'Local Hardhat')
+  console.log('✅ [Backend] Server initialization complete!')
 })

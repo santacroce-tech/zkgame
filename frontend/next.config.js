@@ -1,3 +1,5 @@
+const UnoCSS = require('unocss/webpack').default
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config) => {
@@ -6,7 +8,9 @@ const nextConfig = {
       fs: false,
       net: false,
       tls: false,
+      '@react-native-async-storage/async-storage': false,
     }
+    config.plugins.push(UnoCSS())
     return config
   },
 }

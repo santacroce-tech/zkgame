@@ -16,54 +16,56 @@ export function Chat() {
   }
 
   return (
-    <div className="card">
-      <h3 className="text-lg font-semibold mb-4">Chat</h3>
+    <div className="panel">
+      <h3 className="text-lg font-semibold text-primary mb-4">
+        Chat
+      </h3>
       
-      <div className="space-y-4">
+      <div className="space-y-6">
         {/* Connection Status */}
-        <div className="flex items-center space-x-2 text-sm">
-          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-          <span className="text-gray-400">
-            {isConnected ? 'Connected to chat' : 'Disconnected'}
+        <div className="flex items-center space-x-3 text-sm">
+          <div className={`w-3 h-3 rounded-full ${isConnected ? 'status-connected' : 'status-disconnected'}`}></div>
+          <span className="text-stone-400 font-medieval">
+            {isConnected ? '🔗 Connected to the royal court' : '❌ Disconnected from court'}
           </span>
         </div>
         
         {/* Messages */}
-        <div className="h-48 overflow-y-auto border border-game-border rounded-lg p-2 bg-game-bg">
+        <div className="h-48 overflow-y-auto border-medieval rounded-lg p-4 bg-stone-800/50">
           {messages.length > 0 ? (
-            <div className="space-y-1">
+            <div className="space-y-2">
               {messages.map((msg, index) => (
                 <div key={index} className="text-sm">
-                  <span className="text-gray-400 text-xs">
+                  <span className="text-stone-500 text-xs font-medieval">
                     {new Date(msg.timestamp).toLocaleTimeString()}
                   </span>
-                  <span className="ml-2">{msg.message}</span>
+                  <span className="ml-3 text-stone-200 font-medieval">{msg.message}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-sm text-gray-400 text-center py-4">
-              No messages yet
+            <div className="text-sm text-stone-400 text-center py-6 font-medieval">
+              🏰 The court awaits your words...
             </div>
           )}
         </div>
         
         {/* Message Input */}
-        <form onSubmit={handleSendMessage} className="flex space-x-2">
+        <form onSubmit={handleSendMessage} className="flex space-x-3">
           <input
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type a message..."
-            className="input flex-1 text-sm"
+            placeholder="Speak to the court..."
+            className="input-medieval flex-1 text-sm"
             disabled={!isConnected}
           />
           <button
             type="submit"
             disabled={!message.trim() || !isConnected}
-            className="btn-secondary text-sm disabled:opacity-50"
+            className="btn-medieval text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Send
+            📢 Send
           </button>
         </form>
       </div>

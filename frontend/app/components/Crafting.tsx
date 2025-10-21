@@ -53,18 +53,20 @@ export function Crafting() {
   }
 
   return (
-    <div className="card">
-      <h3 className="text-lg font-semibold mb-4">Crafting</h3>
+    <div className="panel">
+      <h3 className="text-lg font-semibold text-primary mb-4">
+        Crafting
+      </h3>
       
-      <div className="space-y-4">
+      <div className="space-y-6">
         {/* Start New Craft */}
-        <div className="border border-game-border rounded-lg p-3">
-          <h4 className="text-sm font-medium mb-2">Start Crafting</h4>
-          <div className="space-y-2">
+        <div className="border-medieval rounded-lg p-4">
+          <h4 className="text-lg font-medieval text-stone-300 mb-4">🔨 Begin Crafting</h4>
+          <div className="space-y-4">
             <select
               value={selectedRecipe}
               onChange={(e) => setSelectedRecipe(e.target.value)}
-              className="input w-full text-sm"
+              className="input-medieval w-full text-sm"
             >
               {recipes.map(recipe => (
                 <option key={recipe.name} value={recipe.name}>
@@ -73,8 +75,8 @@ export function Crafting() {
               ))}
             </select>
             
-            <div className="text-xs text-gray-400">
-              {recipes.find(r => r.name === selectedRecipe)?.materials.map(m => 
+            <div className="text-sm text-stone-400 font-medieval">
+              📋 Required Materials: {recipes.find(r => r.name === selectedRecipe)?.materials.map(m => 
                 `${m.quantity} ${m.item.replace('_', ' ')}`
               ).join(', ')}
             </div>
@@ -82,45 +84,52 @@ export function Crafting() {
             <button
               onClick={handleStartCraft}
               disabled={isLoading}
-              className="btn-primary w-full text-sm disabled:opacity-50"
+              className="btn-medieval w-full text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Start Crafting
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="loading-medieval w-4 h-4 mr-2"></div>
+                  Starting Craft...
+                </div>
+              ) : (
+                '🔨 Begin Crafting'
+              )}
             </button>
           </div>
         </div>
         
         {/* Active Crafts */}
         <div>
-          <h4 className="text-sm font-medium mb-2">Active Crafts</h4>
+          <h4 className="text-lg font-medieval text-stone-300 mb-4">⚡ Active Crafts</h4>
           {activeCrafts.length > 0 ? (
-            <div className="space-y-2 max-h-48 overflow-y-auto">
+            <div className="space-y-3 max-h-48 overflow-y-auto">
               {activeCrafts.map(craft => {
                 const progress = getCraftProgress(craft)
                 const timeRemaining = getTimeRemaining(craft)
                 const isReady = progress >= 100
                 
                 return (
-                  <div key={craft.craftId} className="border border-game-border rounded-lg p-2">
-                    <div className="flex justify-between items-start mb-2">
+                  <div key={craft.craftId} className="border-medieval rounded-lg p-3 bg-stone-800/50">
+                    <div className="flex justify-between items-start mb-3">
                       <div>
-                        <div className="text-sm font-medium">{craft.recipeName.replace('_', ' ')}</div>
-                        <div className="text-xs text-gray-400">
-                          {isReady ? 'Ready!' : `${timeRemaining}s remaining`}
+                        <div className="text-sm font-medieval text-stone-200">{craft.recipeName.replace('_', ' ')}</div>
+                        <div className="text-xs text-stone-400 font-medieval">
+                          {isReady ? '✨ Ready for completion!' : `⏳ ${timeRemaining}s remaining`}
                         </div>
                       </div>
                       {isReady && (
                         <button
                           onClick={() => handleCompleteCraft(craft.craftId)}
-                          className="btn-secondary text-xs"
+                          className="btn-gold text-xs"
                         >
-                          Complete
+                          ✨ Complete
                         </button>
                       )}
                     </div>
                     
-                    <div className="w-full bg-game-bg rounded-full h-2">
+                    <div className="w-full bg-stone-700 rounded-full h-3">
                       <div
-                        className="bg-game-accent h-2 rounded-full transition-all duration-300"
+                        className="bg-gradient-to-r from-gold-500 to-gold-400 h-3 rounded-full transition-all duration-300"
                         style={{ width: `${progress}%` }}
                       ></div>
                     </div>
@@ -129,8 +138,8 @@ export function Crafting() {
               })}
             </div>
           ) : (
-            <div className="text-sm text-gray-400 py-4 text-center">
-              No active crafts
+            <div className="text-sm text-stone-400 py-6 text-center font-medieval border-medieval rounded-lg">
+              🔨 No active crafts - begin your masterpiece!
             </div>
           )}
         </div>

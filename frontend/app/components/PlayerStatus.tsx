@@ -18,61 +18,82 @@ export function PlayerStatus() {
   }
 
   return (
-    <div className="card">
-      <h3 className="text-lg font-semibold mb-4">Player Status</h3>
-      
-      <div className="space-y-3">
-        <div>
-          <div className="text-sm text-gray-400">Name</div>
-          <div className="font-medium">{player.name}</div>
+    <div className="space-y-4">
+      {/* Player Info Grid */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-secondary-50 dark:bg-secondary-700 p-3 rounded-lg border border-secondary-200 dark:border-secondary-600">
+          <div className="text-xs text-secondary font-medium">Level</div>
+          <div className="text-primary font-medium text-lg">{Math.floor(player.experience / 100) + 1}</div>
         </div>
         
-        <div>
-          <div className="text-sm text-gray-400">Level</div>
-          <div className="font-medium">Level {Math.floor(player.experience / 100) + 1}</div>
+        <div className="bg-secondary-50 dark:bg-secondary-700 p-3 rounded-lg border border-secondary-200 dark:border-secondary-600">
+          <div className="text-xs text-secondary font-medium">XP</div>
+          <div className="text-primary font-medium text-lg">{player.experience}</div>
         </div>
         
-        <div>
-          <div className="text-sm text-gray-400">Experience</div>
-          <div className="font-medium">{player.experience} XP</div>
+        <div className="bg-secondary-50 dark:bg-secondary-700 p-3 rounded-lg border border-secondary-200 dark:border-secondary-600">
+          <div className="text-xs text-secondary font-medium">Coins</div>
+          <div className="text-accent font-medium text-lg">{player.currency}</div>
         </div>
         
-        <div>
-          <div className="text-sm text-gray-400">Currency</div>
-          <div className="font-medium text-game-accent">{player.currency} coins</div>
+        <div className="bg-secondary-50 dark:bg-secondary-700 p-3 rounded-lg border border-secondary-200 dark:border-secondary-600">
+          <div className="text-xs text-secondary font-medium">Reputation</div>
+          <div className="text-primary font-medium text-lg">{player.reputation.toFixed(1)}</div>
         </div>
-        
+      </div>
+
+      {/* Progress Bars */}
+      <div className="space-y-2">
         <div>
-          <div className="text-sm text-gray-400">Reputation</div>
-          <div className="font-medium">{player.reputation.toFixed(2)}</div>
-        </div>
-        
-        <div>
-          <div className="text-sm text-gray-400">Location</div>
-          <div className="font-medium">
-            {player.position.city}, {player.position.country}
+          <div className="flex justify-between text-xs text-secondary mb-1">
+            <span>Experience Progress</span>
+            <span>{player.experience % 100}/100</span>
+          </div>
+          <div className="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-2">
+            <div 
+              className="bg-gradient-to-r from-primary-500 to-primary-400 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${(player.experience % 100)}%` }}
+            ></div>
           </div>
         </div>
-        
-        <div>
-          <div className="text-sm text-gray-400">Explored Areas</div>
-          <div className="font-medium">{player.exploredCells.length}</div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="flex justify-between">
+          <span className="text-secondary">Explored:</span>
+          <span className="text-primary font-medium">{player.exploredAreas?.length || 0}</span>
         </div>
-        
-        <div>
-          <div className="text-sm text-gray-400">Owned Stores</div>
-          <div className="font-medium">{player.ownedStores.length}/10</div>
+        <div className="flex justify-between">
+          <span className="text-secondary">Stores:</span>
+          <span className="text-primary font-medium">{player.ownedStores?.length || 0}/10</span>
         </div>
-        
-        <div className="pt-3 border-t border-game-border">
-          <button
-            onClick={handleClaimRewards}
-            disabled={!canClaimRewards || isLoading}
-            className="btn-primary w-full disabled:opacity-50"
-          >
-            {canClaimRewards ? 'Claim Rewards' : `Wait ${hoursUntilClaim}h`}
-          </button>
+      </div>
+
+      {/* Location */}
+      <div className="bg-secondary-50 dark:bg-secondary-700 p-3 rounded-lg border border-secondary-200 dark:border-secondary-600">
+        <div className="text-xs text-secondary font-medium mb-1">Current Location</div>
+        <div className="text-primary font-medium text-sm">
+          {player.position?.city || 'Unknown'}, {player.position?.country || 'Unknown'}
         </div>
+      </div>
+      
+      {/* Claim Rewards Button */}
+      <div className="pt-2">
+        <button
+          onClick={handleClaimRewards}
+          disabled={!canClaimRewards || isLoading}
+          className="btn-accent w-full disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+        >
+          {canClaimRewards ? (
+            '🎁 Claim Rewards'
+          ) : (
+            <div className="flex items-center justify-center">
+              <div className="loading w-4 h-4 mr-2"></div>
+              Wait {hoursUntilClaim}h
+            </div>
+          )}
+        </button>
       </div>
     </div>
   )

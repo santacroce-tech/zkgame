@@ -1,31 +1,229 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'uno.css';
 
-@layer base {
+/* Import modern fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* Modern theme base styles */
+html {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  min-height: 100vh;
+}
+
+body {
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  color: #1e293b;
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   }
   
   body {
-    @apply bg-game-bg text-game-text;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+      linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #f1f5f9;
   }
 }
 
-@layer components {
-  .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+/* Modern scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #0ea5e9, #3b82f6);
+  border-radius: 4px;
+  border: 1px solid #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #0284c7, #2563eb);
+}
+
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-track {
+    background: #1e293b;
   }
   
-  .btn-secondary {
-    @apply bg-game-surface hover:bg-game-border text-game-text font-medium py-2 px-4 rounded-lg border border-game-border transition-colors;
+  ::-webkit-scrollbar-thumb {
+    border-color: #1e293b;
+  }
+}
+
+/* Modern text effects */
+.text-gradient {
+  background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-glow {
+  text-shadow: 
+    0 0 10px rgba(14, 165, 233, 0.3),
+    0 0 20px rgba(14, 165, 233, 0.2);
+}
+
+/* Modern glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  .glass {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Modern map cell styling */
+.map-cell {
+  position: relative;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+}
+
+.map-cell:hover {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+  transform: translateY(-1px);
+}
+
+.map-cell.player {
+  background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+  border-color: #0284c7;
+  box-shadow: 
+    0 0 0 3px rgba(14, 165, 233, 0.2),
+    0 4px 12px rgba(14, 165, 233, 0.3);
+  animation: player-pulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes player-pulse {
+  from {
+    box-shadow: 
+      0 0 0 3px rgba(14, 165, 233, 0.2),
+      0 4px 12px rgba(14, 165, 233, 0.3);
+  }
+  to {
+    box-shadow: 
+      0 0 0 3px rgba(14, 165, 233, 0.4),
+      0 8px 20px rgba(14, 165, 233, 0.4);
+  }
+}
+
+.map-cell.explored {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-color: #cbd5e1;
+}
+
+.map-cell.unexplored {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-color: #e2e8f0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .map-cell {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: #475569;
   }
   
-  .card {
-    @apply bg-game-surface border border-game-border rounded-lg p-4;
+  .map-cell:hover {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    border-color: #0ea5e9;
   }
   
-  .input {
-    @apply bg-game-surface border border-game-border rounded-lg px-3 py-2 text-game-text placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500;
+  .map-cell.explored {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    border-color: #64748b;
+  }
+  
+  .map-cell.unexplored {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: #475569;
+  }
+}
+
+/* Modern status indicators */
+.status-connected {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+}
+
+.status-disconnected {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
+}
+
+.status-loading {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Modern loading animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading {
+  animation: spin 1s linear infinite;
+  border: 2px solid #e2e8f0;
+  border-top: 2px solid #0ea5e9;
+  border-radius: 50%;
+}
+
+@media (prefers-color-scheme: dark) {
+  .loading {
+    border-color: #475569;
+    border-top-color: #0ea5e9;
+  }
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none;
+  }
+  
+  .mobile-full {
+    width: 100%;
+  }
+  
+  .mobile-stack {
+    flex-direction: column;
+  }
+  
+  .mobile-p-4 {
+    padding: 1rem;
+  }
+  
+  .mobile-text-sm {
+    font-size: 0.875rem;
   }
 }

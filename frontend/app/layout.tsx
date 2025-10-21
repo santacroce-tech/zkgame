@@ -1,50 +1,27 @@
 'use client'
 
-import { WagmiConfig, createConfig, configureChains } from 'wagmi'
-import { mainnet, polygon, arbitrum, optimism } from 'wagmi/chains'
-import { publicProvider } from 'wagmi/providers/public'
-import { RainbowKitProvider, getDefaultWallets } from '@rainbow-me/rainbowkit'
+import { WagmiProvider } from 'wagmi'
+import { mainnet, polygon, arbitrum, optimism, localhost } from 'wagmi/chains'
+import { http } from 'viem'
+import { RainbowKitProvider, getDefaultConfig } from '@rainbow-me/rainbowkit'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import '@rainbow-me/rainbowkit/styles.css'
 import { GameProvider } from './contexts/GameContext'
 import { SocketProvider } from './contexts/SocketContext'
 import './globals.css'
 
-const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [
-    mainnet,
-    polygon,
-    arbitrum,
-    optimism,
-    {
-      id: 31337,
-      name: 'Hardhat',
-      network: 'hardhat',
-      nativeCurrency: {
-        decimals: 18,
-        name: 'Ether',
-        symbol: 'ETH',
-      },
-      rpcUrls: {
-        default: { http: ['http://127.0.0.1:8545'] },
-        public: { http: ['http://127.0.0.1:8545'] },
-      },
-    },
-  ],
-  [publicProvider()]
-)
+const chains = [mainnet] as const
 
-const { connectors } = getDefaultWallets({
+const config = getDefaultConfig({
   appName: 'ZKGame',
-  projectId: 'zkgame-dapp',
+  projectId: '24ee37fe4e16c682326990167151b43b',
   chains,
+  transports: {
+    [mainnet.id]: http(),
+  },
 })
 
-const config = createConfig({
-  autoConnect: true,
-  connectors,
-  publicClient,
-  webSocketPublicClient,
-})
+const queryClient = new QueryClient()
 
 export default function RootLayout({
   children,
@@ -52,22 +29,28 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <title>ZKGame - Zero-Knowledge Proof Game</title>
         <meta name="description" content="Privacy-preserving simulation game with zero-knowledge proofs" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </head>
-      <body>
-        <WagmiConfig config={config}>
-          <RainbowKitProvider chains={chains}>
-            <SocketProvider>
-              <GameProvider>
-                {children}
-              </GameProvider>
-            </SocketProvider>
-          </RainbowKitProvider>
-        </WagmiConfig>
+      <body className="antialiased">
+        <QueryClientProvider client={queryClient}>
+          <WagmiProvider config={config}>
+            <RainbowKitProvider 
+              initialChain={chains[0]}
+              showRecentTransactions={true}
+            >
+              <SocketProvider>
+                <GameProvider>
+                  {children}
+                </GameProvider>
+              </SocketProvider>
+            </RainbowKitProvider>
+          </WagmiProvider>
+        </QueryClientProvider>
       </body>
     </html>
   )

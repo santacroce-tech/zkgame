@@ -28,18 +28,20 @@ export function Inventory() {
   ]
 
   return (
-    <div className="card">
-      <h3 className="text-lg font-semibold mb-4">Inventory</h3>
+    <div className="panel">
+      <h3 className="text-lg font-semibold text-primary mb-4">
+        Inventory
+      </h3>
       
       <div className="space-y-4">
         {/* Gather Resources */}
-        <div className="border border-game-border rounded-lg p-3">
-          <h4 className="text-sm font-medium mb-2">Gather Resources</h4>
-          <div className="space-y-2">
+        <div className="bg-secondary-50 dark:bg-secondary-700 rounded-lg p-4 border border-secondary-200 dark:border-secondary-600">
+          <h4 className="text-base font-medium text-primary mb-3">Gather Resources</h4>
+          <div className="space-y-3">
             <select
               value={selectedResource}
               onChange={(e) => setSelectedResource(e.target.value)}
-              className="input w-full text-sm"
+              className="input text-sm"
             >
               {resourceOptions.map(option => (
                 <option key={option.value} value={option.value}>
@@ -60,9 +62,16 @@ export function Inventory() {
               <button
                 onClick={handleGatherResources}
                 disabled={isLoading}
-                className="btn-secondary text-sm disabled:opacity-50"
+                className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Gather
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <div className="loading w-4 h-4 mr-2"></div>
+                    Gathering...
+                  </div>
+                ) : (
+                  'Gather'
+                )}
               </button>
             </div>
           </div>
@@ -70,19 +79,19 @@ export function Inventory() {
         
         {/* Inventory Items */}
         <div>
-          <h4 className="text-sm font-medium mb-2">Items</h4>
+          <h4 className="text-base font-medium text-primary mb-3">Items</h4>
           {inventoryItems.length > 0 ? (
-            <div className="space-y-1 max-h-48 overflow-y-auto">
+            <div className="space-y-2 max-h-48 overflow-y-auto">
               {inventoryItems.map(([item, quantity]: [string, number]) => (
-                <div key={item} className="flex justify-between items-center py-1 px-2 bg-game-bg rounded">
-                  <span className="text-sm capitalize">{item.replace('_', ' ')}</span>
-                  <span className="text-sm font-medium text-game-accent">{quantity}</span>
+                <div key={item} className="flex justify-between items-center py-2 px-3 bg-secondary-50 dark:bg-secondary-800 rounded-lg border border-secondary-200 dark:border-secondary-600">
+                  <span className="text-sm capitalize text-primary">{item.replace('_', ' ')}</span>
+                  <span className="text-sm text-accent font-semibold">{quantity}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-sm text-gray-400 py-4 text-center">
-              Inventory is empty
+            <div className="text-sm text-secondary py-6 text-center bg-secondary-50 dark:bg-secondary-800 rounded-lg border border-secondary-200 dark:border-secondary-600">
+              No items yet
             </div>
           )}
         </div>
