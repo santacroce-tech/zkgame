@@ -215,18 +215,20 @@ export default function GamePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-100 dark:from-secondary-900 dark:to-secondary-800">
-      {/* Dashboard Header */}
-      <header className="header p-4 lg:p-6">
+      {/* Enhanced Dashboard Header */}
+      <header className="header p-4 lg:p-6 border-b border-secondary-200 dark:border-secondary-700">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-2 lg:space-y-0 lg:space-x-6">
-            <h1 className="text-xl lg:text-2xl font-bold text-gradient">
-              ZKGame Dashboard
-            </h1>
-            <div className="flex items-center space-x-3">
-              <div className={`w-3 h-3 rounded-full ${isConnected ? 'status-connected' : 'status-disconnected'}`}></div>
-              <span className="text-secondary text-sm">
-                {isConnected ? 'Connected' : 'Disconnected'}
-              </span>
+            <div className="flex items-center space-x-4">
+              <h1 className="text-2xl lg:text-3xl font-bold text-gradient">
+                ZKGame Dashboard
+              </h1>
+              <div className="hidden lg:flex items-center space-x-3">
+                <div className={`w-3 h-3 rounded-full ${isConnected ? 'status-connected' : 'status-disconnected'}`}></div>
+                <span className="text-secondary text-sm">
+                  {isConnected ? 'Connected' : 'Disconnected'}
+                </span>
+              </div>
             </div>
           </div>
           
@@ -247,7 +249,7 @@ export default function GamePage() {
         </div>
       </header>
 
-      {/* Main Dashboard */}
+      {/* Main Dashboard Grid */}
       <div className="container mx-auto p-4 lg:p-6">
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
           {/* Left Sidebar - Player Info & Quick Actions */}
@@ -354,8 +356,55 @@ export default function GamePage() {
             </div>
           </div>
           
-          {/* Main Content Area */}
+          {/* Main Content Area - Always Visible Dashboard */}
           <div className="xl:col-span-9 space-y-6">
+            {/* Top Row - Key Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Player Level */}
+              <div className="panel p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-secondary">Level</p>
+                    <p className="text-2xl font-bold text-primary">{Math.floor(player?.experience / 100) + 1}</p>
+                  </div>
+                  <div className="text-3xl">⭐</div>
+                </div>
+              </div>
+              
+              {/* Currency */}
+              <div className="panel p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-secondary">Coins</p>
+                    <p className="text-2xl font-bold text-accent">{player?.currency || 0}</p>
+                  </div>
+                  <div className="text-3xl">💰</div>
+                </div>
+              </div>
+              
+              {/* Experience */}
+              <div className="panel p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-secondary">Experience</p>
+                    <p className="text-2xl font-bold text-primary">{player?.experience || 0}</p>
+                  </div>
+                  <div className="text-3xl">⚡</div>
+                </div>
+              </div>
+              
+              {/* Reputation */}
+              <div className="panel p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-secondary">Reputation</p>
+                    <p className="text-2xl font-bold text-primary">{(player?.reputation || 0).toFixed(1)}</p>
+                  </div>
+                  <div className="text-3xl">🏆</div>
+                </div>
+              </div>
+            </div>
+
             {/* Game Map Section */}
             <div className="panel p-6">
               <div className="flex items-center justify-between mb-4">
@@ -367,33 +416,34 @@ export default function GamePage() {
                   {player?.position?.city}, {player?.position?.country}
                 </div>
               </div>
-              <div className="h-[500px]">
+              <div className="h-[400px]">
                 <GameMap />
               </div>
             </div>
             
-            {/* Dynamic Content Sections */}
+            {/* Always Visible Content Sections */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {showInventory && (
-                <div className="panel p-6">
-                  <h2 className="text-lg font-semibold text-primary mb-4 flex items-center">
-                    <span className="mr-2">📦</span>
-                    Inventory
-                  </h2>
-                  <Inventory />
-                </div>
-              )}
+              {/* Inventory - Always Visible */}
+              <div className="panel p-6">
+                <h2 className="text-lg font-semibold text-primary mb-4 flex items-center">
+                  <span className="mr-2">📦</span>
+                  Inventory
+                </h2>
+                <Inventory />
+              </div>
               
-              {showCrafting && (
-                <div className="panel p-6">
-                  <h2 className="text-lg font-semibold text-primary mb-4 flex items-center">
-                    <span className="mr-2">🔨</span>
-                    Crafting
-                  </h2>
-                  <Crafting />
-                </div>
-              )}
-              
+              {/* Crafting - Always Visible */}
+              <div className="panel p-6">
+                <h2 className="text-lg font-semibold text-primary mb-4 flex items-center">
+                  <span className="mr-2">🔨</span>
+                  Crafting
+                </h2>
+                <Crafting />
+              </div>
+            </div>
+
+            {/* Additional Sections - Toggleable */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {showChat && (
                 <div className="panel p-6">
                   <h2 className="text-lg font-semibold text-primary mb-4 flex items-center">

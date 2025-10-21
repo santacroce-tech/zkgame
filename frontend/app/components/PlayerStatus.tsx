@@ -23,35 +23,35 @@ export function PlayerStatus() {
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-secondary-50 dark:bg-secondary-700 p-3 rounded-lg border border-secondary-200 dark:border-secondary-600">
           <div className="text-xs text-secondary font-medium">Level</div>
-          <div className="text-primary font-medium text-lg">{Math.floor(player.experience / 100) + 1}</div>
+          <div className="text-primary font-bold text-xl">{Math.floor(player.experience / 100) + 1}</div>
         </div>
         
         <div className="bg-secondary-50 dark:bg-secondary-700 p-3 rounded-lg border border-secondary-200 dark:border-secondary-600">
           <div className="text-xs text-secondary font-medium">XP</div>
-          <div className="text-primary font-medium text-lg">{player.experience}</div>
+          <div className="text-primary font-bold text-xl">{player.experience}</div>
         </div>
         
         <div className="bg-secondary-50 dark:bg-secondary-700 p-3 rounded-lg border border-secondary-200 dark:border-secondary-600">
           <div className="text-xs text-secondary font-medium">Coins</div>
-          <div className="text-accent font-medium text-lg">{player.currency}</div>
+          <div className="text-accent font-bold text-xl">{player.currency}</div>
         </div>
         
         <div className="bg-secondary-50 dark:bg-secondary-700 p-3 rounded-lg border border-secondary-200 dark:border-secondary-600">
           <div className="text-xs text-secondary font-medium">Reputation</div>
-          <div className="text-primary font-medium text-lg">{player.reputation.toFixed(1)}</div>
+          <div className="text-primary font-bold text-xl">{player.reputation.toFixed(1)}</div>
         </div>
       </div>
 
       {/* Progress Bars */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div>
-          <div className="flex justify-between text-xs text-secondary mb-1">
-            <span>Experience Progress</span>
-            <span>{player.experience % 100}/100</span>
+          <div className="flex justify-between text-xs text-secondary mb-2">
+            <span className="font-medium">Experience Progress</span>
+            <span className="font-bold">{player.experience % 100}/100</span>
           </div>
-          <div className="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-2">
+          <div className="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-3">
             <div 
-              className="bg-gradient-to-r from-primary-500 to-primary-400 h-2 rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-primary-500 to-primary-400 h-3 rounded-full transition-all duration-300"
               style={{ width: `${(player.experience % 100)}%` }}
             ></div>
           </div>
@@ -60,20 +60,23 @@ export function PlayerStatus() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 text-sm">
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center py-2 px-3 bg-secondary-50 dark:bg-secondary-800 rounded-lg border border-secondary-200 dark:border-secondary-600">
           <span className="text-secondary">Explored:</span>
-          <span className="text-primary font-medium">{player.exploredAreas?.length || 0}</span>
+          <span className="text-primary font-bold">{player.exploredAreas?.length || 0}</span>
         </div>
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center py-2 px-3 bg-secondary-50 dark:bg-secondary-800 rounded-lg border border-secondary-200 dark:border-secondary-600">
           <span className="text-secondary">Stores:</span>
-          <span className="text-primary font-medium">{player.ownedStores?.length || 0}/10</span>
+          <span className="text-primary font-bold">{player.ownedStores?.length || 0}/10</span>
         </div>
       </div>
 
       {/* Location */}
       <div className="bg-secondary-50 dark:bg-secondary-700 p-3 rounded-lg border border-secondary-200 dark:border-secondary-600">
-        <div className="text-xs text-secondary font-medium mb-1">Current Location</div>
-        <div className="text-primary font-medium text-sm">
+        <div className="text-xs text-secondary font-medium mb-1 flex items-center">
+          <span className="mr-1">📍</span>
+          Current Location
+        </div>
+        <div className="text-primary font-bold text-sm">
           {player.position?.city || 'Unknown'}, {player.position?.country || 'Unknown'}
         </div>
       </div>
@@ -83,10 +86,13 @@ export function PlayerStatus() {
         <button
           onClick={handleClaimRewards}
           disabled={!canClaimRewards || isLoading}
-          className="btn-accent w-full disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          className="btn-accent w-full disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
         >
           {canClaimRewards ? (
-            '🎁 Claim Rewards'
+            <div className="flex items-center justify-center">
+              <span className="mr-2">🎁</span>
+              Claim Rewards
+            </div>
           ) : (
             <div className="flex items-center justify-center">
               <div className="loading w-4 h-4 mr-2"></div>
