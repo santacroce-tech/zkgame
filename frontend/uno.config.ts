@@ -13,7 +13,7 @@ export default defineConfig({
   ],
   theme: {
     colors: {
-      // Vite-inspired color palette
+      // Modern dark theme with vibrant accents
       primary: {
         50: '#f0f9ff',
         100: '#e0f2fe',
@@ -28,6 +28,20 @@ export default defineConfig({
         950: '#082f49',
       },
       secondary: {
+        50: '#f8fafc',
+        100: '#f1f5f9',
+        200: '#e2e8f0',
+        300: '#cbd5e1',
+        400: '#94a3b8',
+        500: '#64748b',
+        600: '#475569',
+        700: '#334155',
+        800: '#1e293b',
+        900: '#0f172a',
+        950: '#020617',
+      },
+      // Dark theme base colors
+      dark: {
         50: '#f8fafc',
         100: '#f1f5f9',
         200: '#e2e8f0',
@@ -95,18 +109,18 @@ export default defineConfig({
     },
   },
   shortcuts: {
-    // Modern UI shortcuts
-    'btn-primary': 'px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
-    'btn-secondary': 'px-4 py-2 bg-secondary-600 hover:bg-secondary-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2',
-    'btn-accent': 'px-4 py-2 bg-accent-500 hover:bg-accent-600 text-black font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-offset-2',
-    'btn-outline': 'px-4 py-2 border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
-    'card': 'bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-700 rounded-xl shadow-sm',
-    'input': 'w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 placeholder-secondary-500 dark:placeholder-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
-    'header': 'bg-white dark:bg-secondary-900 border-b border-secondary-200 dark:border-secondary-700 shadow-sm',
-    'panel': 'bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-700 rounded-xl shadow-sm',
-    'text-primary': 'text-secondary-900 dark:text-secondary-100',
-    'text-secondary': 'text-secondary-600 dark:text-secondary-400',
-    'text-accent': 'text-accent-600 dark:text-accent-400',
+    // Modern dark theme UI shortcuts
+    'btn-primary': 'px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 focus:ring-offset-dark-800',
+    'btn-secondary': 'px-4 py-2 bg-secondary-700 hover:bg-secondary-600 text-white font-medium rounded-lg shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 focus:ring-offset-dark-800',
+    'btn-accent': 'px-4 py-2 bg-accent-500 hover:bg-accent-400 text-black font-medium rounded-lg shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-offset-2 focus:ring-offset-dark-800',
+    'btn-outline': 'px-4 py-2 border-2 border-primary-500 text-primary-400 hover:bg-primary-500 hover:text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 focus:ring-offset-dark-800',
+    'card': 'bg-dark-800 border border-dark-700 rounded-xl shadow-xl backdrop-blur-sm',
+    'input': 'w-full px-3 py-2 border border-dark-600 rounded-lg bg-dark-700 text-dark-100 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+    'header': 'bg-dark-900 border-b border-dark-700 shadow-xl backdrop-blur-sm',
+    'panel': 'bg-dark-800 border border-dark-700 rounded-xl shadow-xl backdrop-blur-sm',
+    'text-primary': 'text-dark-100',
+    'text-secondary': 'text-dark-400',
+    'text-accent': 'text-accent-400',
   },
   rules: [
     // Custom modern effects

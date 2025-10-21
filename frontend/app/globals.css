@@ -3,65 +3,67 @@
 /* Import modern fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-/* Modern theme base styles */
+/* Modern dark theme base styles */
 html {
   font-family: 'Inter', system-ui, sans-serif;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   min-height: 100vh;
 }
 
 body {
   background: 
-    radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
-    linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  color: #1e293b;
+    radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
+    linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #f1f5f9;
   min-height: 100vh;
   transition: background-color 0.3s ease;
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
+/* Light mode support (optional) */
+@media (prefers-color-scheme: light) {
   html {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   }
   
   body {
     background: 
-      radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-      linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    color: #f1f5f9;
+      radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+      linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    color: #1e293b;
   }
 }
 
-/* Modern scrollbar */
+/* Modern scrollbar for dark theme */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #1e293b;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(45deg, #0ea5e9, #3b82f6);
   border-radius: 4px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid #1e293b;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(45deg, #0284c7, #2563eb);
 }
 
-@media (prefers-color-scheme: dark) {
+/* Light mode scrollbar */
+@media (prefers-color-scheme: light) {
   ::-webkit-scrollbar-track {
-    background: #1e293b;
+    background: #f1f5f9;
   }
   
   ::-webkit-scrollbar-thumb {
-    border-color: #1e293b;
+    border-color: #f1f5f9;
   }
 }
 
@@ -93,19 +95,19 @@ body {
   }
 }
 
-/* Modern map cell styling */
+/* Modern map cell styling for dark theme */
 .map-cell {
   position: relative;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
   transition: all 0.3s ease;
   border-radius: 8px;
 }
 
 .map-cell:hover {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, #334155 0%, #475569 100%);
   border-color: #0ea5e9;
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
   transform: translateY(-1px);
 }
 
@@ -113,53 +115,55 @@ body {
   background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
   border-color: #0284c7;
   box-shadow: 
-    0 0 0 3px rgba(14, 165, 233, 0.2),
-    0 4px 12px rgba(14, 165, 233, 0.3);
+    0 0 0 3px rgba(14, 165, 233, 0.3),
+    0 4px 12px rgba(14, 165, 233, 0.4);
   animation: player-pulse 2s ease-in-out infinite alternate;
 }
 
 @keyframes player-pulse {
   from {
     box-shadow: 
-      0 0 0 3px rgba(14, 165, 233, 0.2),
-      0 4px 12px rgba(14, 165, 233, 0.3);
+      0 0 0 3px rgba(14, 165, 233, 0.3),
+      0 4px 12px rgba(14, 165, 233, 0.4);
   }
   to {
     box-shadow: 
-      0 0 0 3px rgba(14, 165, 233, 0.4),
-      0 8px 20px rgba(14, 165, 233, 0.4);
+      0 0 0 3px rgba(14, 165, 233, 0.5),
+      0 8px 20px rgba(14, 165, 233, 0.5);
   }
 }
 
 .map-cell.explored {
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-  border-color: #cbd5e1;
+  background: linear-gradient(135deg, #334155 0%, #475569 100%);
+  border-color: #64748b;
 }
 
 .map-cell.unexplored {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-color: #e2e8f0;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-color: #475569;
 }
 
-@media (prefers-color-scheme: dark) {
+/* Light mode map cells */
+@media (prefers-color-scheme: light) {
   .map-cell {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-    border-color: #475569;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-color: #e2e8f0;
   }
   
   .map-cell:hover {
-    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
   }
   
   .map-cell.explored {
-    background: linear-gradient(135deg, #334155 0%, #475569 100%);
-    border-color: #64748b;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border-color: #cbd5e1;
   }
   
   .map-cell.unexplored {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-    border-color: #475569;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-color: #e2e8f0;
   }
 }
 
@@ -193,14 +197,15 @@ body {
 
 .loading {
   animation: spin 1s linear infinite;
-  border: 2px solid #e2e8f0;
+  border: 2px solid #475569;
   border-top: 2px solid #0ea5e9;
   border-radius: 50%;
 }
 
-@media (prefers-color-scheme: dark) {
+/* Light mode loading */
+@media (prefers-color-scheme: light) {
   .loading {
-    border-color: #475569;
+    border-color: #e2e8f0;
     border-top-color: #0ea5e9;
   }
 }
@@ -225,5 +230,31 @@ body {
   
   .mobile-text-sm {
     font-size: 0.875rem;
+  }
+  
+  /* Ensure proper spacing on mobile */
+  .panel {
+    margin-bottom: 1rem;
+  }
+  
+  /* Fix button spacing on mobile */
+  .btn-primary, .btn-secondary, .btn-accent, .btn-outline {
+    min-height: 44px; /* iOS touch target size */
+  }
+  
+  /* Improve grid layout on mobile */
+  .grid-cols-2 {
+    gap: 0.75rem;
+  }
+}
+
+/* Tablet responsive design */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .xl\:col-span-3 {
+    grid-column: span 4;
+  }
+  
+  .xl\:col-span-9 {
+    grid-column: span 8;
   }
 }

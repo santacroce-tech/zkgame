@@ -108,7 +108,7 @@ export default function GamePage() {
 
   if (!isInitialized) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary-50 to-secondary-100 dark:from-secondary-900 dark:to-secondary-800">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900">
         <div className="card max-w-lg w-full mx-4 p-8 shadow-xl">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gradient mb-4">
@@ -190,8 +190,8 @@ export default function GamePage() {
               <span className="text-secondary">Wallet Status:</span>
               <span className={`px-2 py-1 rounded text-xs font-medium ${
                 walletConnected || burnerWallet 
-                  ? 'bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200' 
-                  : 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200'
+                  ? 'bg-success-500/20 text-success-400 border border-success-500/30' 
+                  : 'bg-warning-500/20 text-warning-400 border border-warning-500/30'
               }`}>
                 {walletConnected ? 'Connected' : burnerWallet ? 'Burner Active' : 'Not Connected'}
               </span>
@@ -204,7 +204,7 @@ export default function GamePage() {
           </div>
           
           {error && (
-            <div className="mt-6 p-4 bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800 rounded-lg text-danger-700 dark:text-danger-300 text-sm">
+            <div className="mt-6 p-4 bg-danger-500/20 border border-danger-500/30 rounded-lg text-danger-400 text-sm">
               ⚠️ {error}
             </div>
           )}
@@ -214,9 +214,9 @@ export default function GamePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-100 dark:from-secondary-900 dark:to-secondary-800">
+    <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900">
       {/* Enhanced Dashboard Header */}
-      <header className="header p-4 lg:p-6 border-b border-secondary-200 dark:border-secondary-700">
+      <header className="header p-4 lg:p-6 border-b border-dark-700">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-2 lg:space-y-0 lg:space-x-6">
             <div className="flex items-center space-x-4">
@@ -242,7 +242,7 @@ export default function GamePage() {
                 {isContractInitialized ? 'ZK Ready' : 'ZK Loading...'}
               </span>
             </div>
-            <div className="text-primary text-sm bg-primary-50 dark:bg-primary-900/20 px-3 py-1 rounded-lg border border-primary-200 dark:border-primary-800">
+            <div className="text-primary text-sm bg-primary-500/20 px-3 py-1 rounded-lg border border-primary-500/30">
               {player?.name} | Level {Math.floor(player?.experience / 100) + 1}
             </div>
           </div>
@@ -250,10 +250,10 @@ export default function GamePage() {
       </header>
 
       {/* Main Dashboard Grid */}
-      <div className="container mx-auto p-4 lg:p-6">
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      <div className="container mx-auto p-4 lg:p-6 max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-12 gap-4 lg:gap-6">
           {/* Left Sidebar - Player Info & Quick Actions */}
-          <div className="xl:col-span-3 space-y-6">
+          <div className="lg:col-span-4 xl:col-span-3 space-y-4 lg:space-y-6">
             {/* Player Status Card */}
             <div className="panel p-6">
               <h2 className="text-lg font-semibold text-primary mb-4 flex items-center">
@@ -272,25 +272,25 @@ export default function GamePage() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setShowInventory(!showInventory)}
-                  className={`btn-secondary text-sm ${showInventory ? 'ring-2 ring-primary-500' : ''}`}
+                  className={`btn-secondary text-sm py-2 ${showInventory ? 'ring-2 ring-primary-500' : ''}`}
                 >
                   📦 Inventory
                 </button>
                 <button
                   onClick={() => setShowCrafting(!showCrafting)}
-                  className={`btn-secondary text-sm ${showCrafting ? 'ring-2 ring-primary-500' : ''}`}
+                  className={`btn-secondary text-sm py-2 ${showCrafting ? 'ring-2 ring-primary-500' : ''}`}
                 >
                   🔨 Crafting
                 </button>
                 <button
                   onClick={() => setShowChat(!showChat)}
-                  className={`btn-secondary text-sm ${showChat ? 'ring-2 ring-primary-500' : ''}`}
+                  className={`btn-secondary text-sm py-2 ${showChat ? 'ring-2 ring-primary-500' : ''}`}
                 >
                   💬 Chat
                 </button>
                 <button
                   onClick={() => setShowStorage(!showStorage)}
-                  className={`btn-secondary text-sm ${showStorage ? 'ring-2 ring-primary-500' : ''}`}
+                  className={`btn-secondary text-sm py-2 ${showStorage ? 'ring-2 ring-primary-500' : ''}`}
                 >
                   💾 Storage
                 </button>
@@ -301,7 +301,7 @@ export default function GamePage() {
                     setShowChat(false)
                     setShowStorage(false)
                   }}
-                  className="btn-outline text-sm"
+                  className="btn-outline text-sm py-2 col-span-2"
                 >
                   🗺️ Map Only
                 </button>
@@ -319,8 +319,8 @@ export default function GamePage() {
                   <span className="text-secondary">Wallet:</span>
                   <span className={`px-2 py-1 rounded text-xs font-medium ${
                     walletConnected || burnerWallet 
-                      ? 'bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200' 
-                      : 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200'
+                      ? 'bg-success-500/20 text-success-400 border border-success-500/30' 
+                      : 'bg-warning-500/20 text-warning-400 border border-warning-500/30'
                   }`}>
                     {walletConnected ? 'Connected' : burnerWallet ? 'Burner' : 'Disconnected'}
                   </span>
@@ -329,8 +329,8 @@ export default function GamePage() {
                   <span className="text-secondary">ZK Proofs:</span>
                   <span className={`px-2 py-1 rounded text-xs font-medium ${
                     isContractInitialized 
-                      ? 'bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200' 
-                      : 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200'
+                      ? 'bg-success-500/20 text-success-400 border border-success-500/30' 
+                      : 'bg-warning-500/20 text-warning-400 border border-warning-500/30'
                   }`}>
                     {isContractInitialized ? 'Ready' : 'Loading...'}
                   </span>
@@ -339,14 +339,14 @@ export default function GamePage() {
                   <span className="text-secondary">Network:</span>
                   <span className={`px-2 py-1 rounded text-xs font-medium ${
                     isConnected 
-                      ? 'bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200' 
-                      : 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200'
+                      ? 'bg-success-500/20 text-success-400 border border-success-500/30' 
+                      : 'bg-warning-500/20 text-warning-400 border border-warning-500/30'
                   }`}>
                     {isConnected ? 'Online' : 'Offline'}
                   </span>
                 </div>
                 {(address || burnerWallet?.account?.address) && (
-                  <div className="pt-2 border-t border-secondary-200 dark:border-secondary-700">
+                  <div className="pt-2 border-t border-dark-600">
                     <div className="text-xs text-secondary break-all">
                       {(address || burnerWallet?.account?.address)?.slice(0, 10)}...{(address || burnerWallet?.account?.address)?.slice(-8)}
                     </div>
@@ -357,7 +357,7 @@ export default function GamePage() {
           </div>
           
           {/* Main Content Area - Always Visible Dashboard */}
-          <div className="xl:col-span-9 space-y-6">
+          <div className="lg:col-span-8 xl:col-span-9 space-y-4 lg:space-y-6">
             {/* Top Row - Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Player Level */}
@@ -412,11 +412,11 @@ export default function GamePage() {
                   <span className="mr-2">🗺️</span>
                   Game World
                 </h2>
-                <div className="text-sm text-secondary bg-secondary-50 dark:bg-secondary-700 px-3 py-1 rounded-lg border border-secondary-200 dark:border-secondary-600">
+                <div className="text-sm text-secondary bg-dark-700 px-3 py-1 rounded-lg border border-dark-600">
                   {player?.position?.city}, {player?.position?.country}
                 </div>
               </div>
-              <div className="h-[400px]">
+              <div className="h-[400px] rounded-lg overflow-hidden border border-dark-600">
                 <GameMap />
               </div>
             </div>
@@ -469,7 +469,7 @@ export default function GamePage() {
       </div>
       
       {error && (
-        <div className="fixed bottom-4 right-4 lg:bottom-6 lg:right-6 p-4 bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800 rounded-lg text-danger-700 dark:text-danger-300 max-w-sm text-sm">
+        <div className="fixed bottom-4 right-4 lg:bottom-6 lg:right-6 p-4 bg-danger-500/20 border border-danger-500/30 rounded-lg text-danger-400 max-w-sm text-sm backdrop-blur-sm">
           ⚠️ {error}
         </div>
       )}
