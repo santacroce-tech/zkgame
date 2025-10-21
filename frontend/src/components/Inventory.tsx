@@ -39,7 +39,7 @@ export function Inventory() {
               }}
             >
               <div className="text-sm font-medium text-primary">{itemName}</div>
-              <div className="text-xs text-secondary">Qty: {quantity}</div>
+              <div className="text-xs text-secondary">Qty: {quantity as number}</div>
             </div>
           ))}
         </div>

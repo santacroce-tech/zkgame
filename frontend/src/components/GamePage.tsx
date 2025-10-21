@@ -9,6 +9,7 @@ import { Inventory } from './Inventory'
 import { Crafting } from './Crafting'
 import { Chat } from './Chat'
 import { StorageManager } from './StorageManager'
+import { CitySelector } from './CitySelector'
 import { ethers } from 'ethers'
 import { createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
@@ -402,6 +403,11 @@ export default function GamePage() {
                 👤 Player Status
               </h2>
               <PlayerStatus />
+            </div>
+            
+            {/* City Selection */}
+            <div className="card">
+              <CitySelector />
             </div>
             
             {/* Quick Actions */}
