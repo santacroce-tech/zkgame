@@ -11,6 +11,12 @@ export default defineConfig({
     //   },
     // }),
   ],
+  content: {
+    filesystem: [
+      'app/**/*.{js,ts,jsx,tsx}',
+      'components/**/*.{js,ts,jsx,tsx}',
+    ]
+  },
   theme: {
     colors: {
       // Modern dark theme with vibrant accents

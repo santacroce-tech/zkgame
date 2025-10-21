@@ -1,7 +1,7 @@
 'use client'
 
 import { ConnectButton } from '@rainbow-me/rainbowkit'
-import { useAccount, useWalletClient, useConnect } from 'wagmi'
+import { useAccount, useWalletClient, useConnect, useChainId, useSwitchChain } from 'wagmi'
 import { useGame } from './contexts/GameContext'
 import { useSocket } from './contexts/SocketContext'
 import { GameMap } from './components/GameMap'
@@ -10,16 +10,19 @@ import { Inventory } from './components/Inventory'
 import { Crafting } from './components/Crafting'
 import { Chat } from './components/Chat'
 import { StorageManager } from './components/StorageManager'
+import { ClientOnly } from './components/ClientOnly'
 import { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 import { createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { hardhat } from 'viem/chains'
+import { hardhat, localhost, mainnet, polygon, arbitrum, optimism } from 'viem/chains'
 
 export default function GamePage() {
   const { address, isConnected: walletConnected } = useAccount()
   const { data: walletClient } = useWalletClient()
   const { connect, connectors } = useConnect()
+  const chainId = useChainId()
+  const { switchChain } = useSwitchChain()
   const { 
     player, 
     isInitialized, 
@@ -37,6 +40,18 @@ export default function GamePage() {
   const [showChat, setShowChat] = useState(false)
   const [showStorage, setShowStorage] = useState(false)
   const [burnerWallet, setBurnerWallet] = useState<any>(null)
+
+  // Available networks
+  const networks = [
+    { id: localhost.id, name: 'Localhost', icon: '🏠', color: 'network-localhost' },
+    { id: hardhat.id, name: 'Hardhat', icon: '⚒️', color: 'network-hardhat' },
+    { id: mainnet.id, name: 'Ethereum', icon: '🔷', color: 'network-mainnet' },
+    { id: polygon.id, name: 'Polygon', icon: '🟣', color: 'network-mainnet' },
+    { id: arbitrum.id, name: 'Arbitrum', icon: '🔵', color: 'network-mainnet' },
+    { id: optimism.id, name: 'Optimism', icon: '🔴', color: 'network-mainnet' },
+  ]
+
+  const currentNetwork = networks.find(n => n.id === chainId) || networks[0]
 
   // Create burner wallet
   const createBurnerWallet = () => {
@@ -108,33 +123,76 @@ export default function GamePage() {
 
   if (!isInitialized) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900">
-        <div className="card max-w-lg w-full mx-4 p-8 shadow-xl">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gradient mb-4">
+      <ClientOnly fallback={
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <div className="card max-w-2xl w-full mx-4 p-8 glow-effect">
+            <div className="text-center">
+              <div className="loading w-8 h-8 mx-auto mb-4"></div>
+              <p className="text-secondary">Loading...</p>
+            </div>
+          </div>
+        </div>
+      }>
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <div className="card max-w-2xl w-full mx-4 p-8 glow-effect">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-5xl font-bold text-gradient mb-4">
               ZKGame
             </h1>
-            <p className="text-secondary text-lg">
+            <p className="text-secondary text-xl mb-2">
               Zero-Knowledge Proof Gaming Platform
             </p>
-            <div className="mt-4 text-sm text-secondary">
+            <div className="text-sm text-secondary">
               &ldquo;Privacy-preserving gameplay with cryptographic proofs&rdquo;
+            </div>
+          </div>
+          
+          {/* Network Selection */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-primary mb-4">Select Network</h3>
+            <div className="flex flex-wrap gap-3">
+              {networks.map((network) => (
+                <button
+                  key={network.id}
+                  onClick={() => switchChain?.({ chainId: network.id })}
+                  className={`p-3 rounded-xl border-2 transition-all duration-300 ${
+                    chainId === network.id
+                      ? 'border-blue-500 bg-blue-500/10 scale-105'
+                      : 'border-gray-600 hover:border-gray-500 hover:bg-gray-800/50'
+                  }`}
+                >
+                  <div className="text-2xl mb-1">{network.icon}</div>
+                  <div className="text-sm font-medium text-primary">{network.name}</div>
+                </button>
+              ))}
+            </div>
+            <div className="mt-3">
+              <span className="text-xs text-secondary">Current: </span>
+              <span className={`px-2 py-1 rounded text-xs font-medium ${currentNetwork.color}`}>
+                {currentNetwork.icon} {currentNetwork.name}
+              </span>
             </div>
           </div>
           
           {/* Wallet Connection Section */}
           <div className="mb-8">
-            <h3 className="text-lg font-semibold text-primary mb-4 text-center">Connect Wallet</h3>
+            <h3 className="text-lg font-semibold text-primary mb-4">Connect Wallet</h3>
             <div className="space-y-4">
-              <div className="flex justify-center">
-                <div className="w-full max-w-xs">
+              <div className="flex gap-3">
+                <div className="flex-1">
                   <ConnectButton />
                 </div>
+                <div className="flex-1">
+                  <div className="bg-gray-800/50 border border-gray-600/50 rounded-lg px-3 py-2 text-sm text-gray-300">
+                    {walletConnected ? '9,999.9 ETH' : '0.0 ETH'}
+                  </div>
+                </div>
               </div>
-              <div className="text-center text-sm text-secondary">or</div>
+              <div className="text-sm text-secondary">or</div>
               <button
                 onClick={handleBurnerWallet}
-                disabled={!playerName.trim() || isLoading}
+                disabled={isLoading}
                 className="btn-outline w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
@@ -146,7 +204,7 @@ export default function GamePage() {
                   '🎲 Use Burner Wallet'
                 )}
               </button>
-              <div className="text-xs text-secondary text-center">
+              <div className="text-xs text-secondary">
                 Burner wallet is perfect for testing - no real funds needed!
               </div>
             </div>
@@ -170,7 +228,7 @@ export default function GamePage() {
             
             <button
               onClick={handleInitialize}
-              disabled={!playerName.trim() || isLoading || (!walletConnected && !burnerWallet)}
+              disabled={!playerName.trim() || isLoading}
               className="btn-primary w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
@@ -185,71 +243,114 @@ export default function GamePage() {
           </div>
           
           {/* Status Section */}
-          <div className="mt-6 space-y-2">
-            <div className="flex items-center justify-between text-sm">
+          <div className="mt-8 space-y-3">
+            <div className="text-sm">
               <span className="text-secondary">Wallet Status:</span>
-              <span className={`px-2 py-1 rounded text-xs font-medium ${
+              <span className={`ml-2 px-3 py-1 rounded-full text-xs font-medium ${
                 walletConnected || burnerWallet 
-                  ? 'bg-success-500/20 text-success-400 border border-success-500/30' 
-                  : 'bg-warning-500/20 text-warning-400 border border-warning-500/30'
+                  ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                  : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
               }`}>
                 {walletConnected ? 'Connected' : burnerWallet ? 'Burner Active' : 'Not Connected'}
               </span>
             </div>
+            <div className="text-sm">
+              <span className="text-secondary">Network:</span>
+              <span className={`ml-2 px-3 py-1 rounded-full text-xs font-medium ${currentNetwork.color}`}>
+                {currentNetwork.icon} {currentNetwork.name}
+              </span>
+            </div>
             {(walletConnected || burnerWallet) && (
-              <div className="text-xs text-secondary text-center">
-                Address: {(address || burnerWallet?.account?.address)?.slice(0, 6)}...{(address || burnerWallet?.account?.address)?.slice(-4)}
+              <div className="text-sm">
+                <span className="text-secondary">Address:</span>
+                <span className="ml-2 text-xs text-secondary">
+                  {(address || burnerWallet?.account?.address)?.slice(0, 6)}...{(address || burnerWallet?.account?.address)?.slice(-4)}
+                </span>
+              </div>
+            )}
+            {!player && (walletConnected || burnerWallet) && (
+              <div className="text-xs text-yellow-400 bg-yellow-500/20 p-2 rounded-lg border border-yellow-500/30">
+                ⚠️ No saved player found for this wallet address
               </div>
             )}
           </div>
           
           {error && (
-            <div className="mt-6 p-4 bg-danger-500/20 border border-danger-500/30 rounded-lg text-danger-400 text-sm">
+            <div className="mt-6 p-4 bg-red-500/20 border border-red-500/30 rounded-xl text-red-400 text-sm">
               ⚠️ {error}
             </div>
           )}
         </div>
       </div>
+      </ClientOnly>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900">
+    <ClientOnly fallback={
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="card max-w-2xl w-full mx-4 p-8 glow-effect">
+          <div className="text-center">
+            <div className="loading w-8 h-8 mx-auto mb-4"></div>
+            <p className="text-secondary">Loading Dashboard...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900">
       {/* Enhanced Dashboard Header */}
-      <header className="header p-4 lg:p-6 border-b border-dark-700">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-2 lg:space-y-0 lg:space-x-6">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl lg:text-3xl font-bold text-gradient">
-                ZKGame Dashboard
-              </h1>
-              <div className="hidden lg:flex items-center space-x-3">
-                <div className={`w-3 h-3 rounded-full ${isConnected ? 'status-connected' : 'status-disconnected'}`}></div>
-                <span className="text-secondary text-sm">
-                  {isConnected ? 'Connected' : 'Disconnected'}
-                </span>
+      <header className="header p-4 lg:p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-2 lg:space-y-0 lg:space-x-6">
+              <div className="flex items-center space-x-4">
+                <h1 className="text-2xl lg:text-3xl font-bold text-gradient">
+                  ZKGame Dashboard
+                </h1>
+                <div className="hidden lg:flex items-center space-x-3">
+                  <div className={`w-3 h-3 rounded-full ${isConnected ? 'status-connected' : 'status-disconnected'}`}></div>
+                  <span className="text-secondary text-sm">
+                    {isConnected ? 'Connected' : 'Disconnected'}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-2 lg:space-y-0 lg:space-x-4 w-full lg:w-auto">
-            <div className="w-full lg:w-auto">
-              <ConnectButton />
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className={`w-3 h-3 rounded-full ${isContractInitialized ? 'status-connected' : 'status-loading'}`}></div>
-              <span className="text-secondary text-xs">
-                {isContractInitialized ? 'ZK Ready' : 'ZK Loading...'}
-              </span>
-            </div>
-            <div className="text-primary text-sm bg-primary-500/20 px-3 py-1 rounded-lg border border-primary-500/30">
-              {player?.name} | Level {Math.floor(player?.experience / 100) + 1}
+            
+            <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-2 lg:space-y-0 lg:space-x-4 w-full lg:w-auto">
+              {/* Network Selector */}
+              <div className="flex items-center space-x-2">
+                <span className="text-secondary text-sm">Network:</span>
+                <select
+                  value={chainId}
+                  onChange={(e) => switchChain?.({ chainId: Number(e.target.value) })}
+                  className="bg-gray-800/50 border border-gray-600/50 rounded-lg px-3 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                >
+                  {networks.map((network) => (
+                    <option key={network.id} value={network.id}>
+                      {network.icon} {network.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="w-full lg:w-auto">
+                <ConnectButton />
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className={`w-3 h-3 rounded-full ${isContractInitialized ? 'status-connected' : 'status-loading'}`}></div>
+                <span className="text-secondary text-xs">
+                  {isContractInitialized ? 'ZK Ready' : 'ZK Loading...'}
+                </span>
+              </div>
+              <div className="text-primary text-sm bg-blue-500/20 px-3 py-1 rounded-lg border border-blue-500/30">
+                {player?.name} | Level {Math.floor(player?.experience / 100) + 1}
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Dashboard Grid */}
+      {/* Main Dashboard Grid - Centered */}
       <div className="container mx-auto p-4 lg:p-6 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-12 gap-4 lg:gap-6">
           {/* Left Sidebar - Player Info & Quick Actions */}
@@ -474,5 +575,6 @@ export default function GamePage() {
         </div>
       )}
     </div>
+    </ClientOnly>
   )
 }

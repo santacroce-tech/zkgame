@@ -1,24 +1,29 @@
-@import 'uno.css';
+/* Modern Gaming Theme - Clean & Professional */
 
 /* Import modern fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-/* Modern dark theme base styles */
+/* Base styles */
 html {
-  font-family: 'Inter', system-ui, sans-serif;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0a0a0a;
   min-height: 100vh;
+  scroll-behavior: smooth;
 }
 
 body {
   background: 
-    radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 50% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
-    linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: #f1f5f9;
+    radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.05) 0%, transparent 50%),
+    linear-gradient(135deg, #0a0a0a 0%, #111111 50%, #0a0a0a 100%);
+  color: #ffffff;
   min-height: 100vh;
-  transition: background-color 0.3s ease;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Light mode support (optional) */
@@ -208,6 +213,74 @@ body {
     border-color: #e2e8f0;
     border-top-color: #0ea5e9;
   }
+}
+
+/* Modern Gaming UI Components */
+.btn-primary {
+  @apply px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/30 transform hover:scale-105 active:scale-95;
+}
+
+.btn-secondary {
+  @apply px-6 py-3 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-gray-500/30 transform hover:scale-105 active:scale-95;
+}
+
+.btn-accent {
+  @apply px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-amber-500/30 transform hover:scale-105 active:scale-95;
+}
+
+.btn-outline {
+  @apply px-6 py-3 border-2 border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 font-semibold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/30 transform hover:scale-105 active:scale-95 backdrop-blur-sm;
+}
+
+.card {
+  @apply bg-gradient-to-br from-gray-900/80 to-gray-800/80 border border-gray-700/50 rounded-2xl shadow-2xl backdrop-blur-xl;
+}
+
+.input {
+  @apply w-full px-4 py-3 border border-gray-600/50 rounded-xl bg-gray-800/50 text-white placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-300 backdrop-blur-sm;
+}
+
+.header {
+  @apply bg-gradient-to-r from-gray-900/95 to-gray-800/95 border-b border-gray-700/50 shadow-2xl backdrop-blur-xl;
+}
+
+.panel {
+  @apply bg-gradient-to-br from-gray-900/80 to-gray-800/80 border border-gray-700/50 rounded-2xl shadow-2xl backdrop-blur-xl;
+}
+
+.text-primary {
+  @apply text-white;
+}
+
+.text-secondary {
+  @apply text-gray-300;
+}
+
+.text-accent {
+  @apply text-amber-400;
+}
+
+/* Network Status Indicators */
+.network-localhost {
+  @apply bg-green-500/20 text-green-400 border-green-500/30;
+}
+
+.network-hardhat {
+  @apply bg-orange-500/20 text-orange-400 border-orange-500/30;
+}
+
+.network-mainnet {
+  @apply bg-blue-500/20 text-blue-400 border-blue-500/30;
+}
+
+/* Enhanced animations */
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.5); }
+}
+
+.glow-effect {
+  animation: glow 2s ease-in-out infinite;
 }
 
 /* Mobile-first responsive design */
