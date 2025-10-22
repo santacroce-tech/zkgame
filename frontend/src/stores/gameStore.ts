@@ -699,18 +699,24 @@ export const useGameStore = create<GameState & GameActions>()(
                 contractConfig: get().contractConfig
               }
             })
-          }
-
-          // Update player state
-          set({
-            player: {
+            
+            // Update player state with current time as lastClaimTime
+            const finalCurrentTime = Date.now()
+            const updatedPlayer = {
               ...player,
               currency: player.currency + reward,
-              lastClaimTime: currentTime,
+              lastClaimTime: finalCurrentTime,
               nonce: player.nonce + 1,
-            },
-            isLoading: false,
-          })
+            }
+            
+            // Save to localStorage
+            savePlayerToStorage(updatedPlayer)
+            
+            set({
+              player: updatedPlayer,
+              isLoading: false,
+            })
+          }
           
           console.log('Reward claimed successfully!')
         } catch (error) {

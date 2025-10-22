@@ -2,7 +2,7 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/rob/projects/zkgame/contracts/GameCore.sol": {
-      "lastModificationDate": 1760980126201,
+      "lastModificationDate": 1760980144364,
       "contentHash": "78d63b9768e40cb52e6ffad86491583f",
       "sourceName": "contracts/GameCore.sol",
       "solcConfig": {
