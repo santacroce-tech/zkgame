@@ -31,16 +31,6 @@ export default function GamePage() {
     isContractInitialized 
   } = useGame()
 
-  // Debug logging
-  console.log('GamePage state:', {
-    player,
-    isInitialized,
-    isLoading,
-    error,
-    isContractInitialized,
-    walletConnected,
-    address
-  })
   const { isConnected } = useSocket()
   const [playerName, setPlayerName] = useState('')
   const [showInventory, setShowInventory] = useState(false)
@@ -48,6 +38,19 @@ export default function GamePage() {
   const [showChat, setShowChat] = useState(false)
   const [showStorage, setShowStorage] = useState(false)
   const [burnerWallet, setBurnerWallet] = useState<any>(null)
+
+  // Debug logging
+  console.log('GamePage state:', {
+    player: player ? 'Player exists' : 'No player',
+    isInitialized,
+    isLoading,
+    error,
+    isContractInitialized,
+    walletConnected,
+    address,
+    hasWalletClient: !!walletClient,
+    hasBurnerWallet: !!burnerWallet
+  })
 
   // Available networks
   const networks = [
@@ -83,27 +86,51 @@ export default function GamePage() {
 
   // Initialize contract service when wallet connects
   useEffect(() => {
+    console.log('🔧 [GamePage] Contract initialization effect triggered:', {
+      hasWalletClient: !!walletClient,
+      isContractInitialized,
+      walletClientType: typeof walletClient
+    })
+    
     if (walletClient && !isContractInitialized) {
+      console.log('🔧 [GamePage] Attempting to initialize contract service with wallet client...')
       const provider = new ethers.BrowserProvider(walletClient)
       const config = {
         gameCoreAddress: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
         stateManagerAddress: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         proofVerifierAddress: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
       }
+      console.log('🔧 [GamePage] Contract config:', config)
       initializeContractService(provider, config)
+    } else {
+      console.log('⚠️ [GamePage] Skipping contract initialization:', {
+        reason: !walletClient ? 'No wallet client' : 'Already initialized'
+      })
     }
   }, [walletClient, isContractInitialized, initializeContractService])
 
   // Initialize contract service with burner wallet
   useEffect(() => {
+    console.log('🔧 [GamePage] Burner wallet contract initialization effect triggered:', {
+      hasBurnerWallet: !!burnerWallet,
+      isContractInitialized,
+      burnerWalletType: typeof burnerWallet
+    })
+    
     if (burnerWallet && !isContractInitialized) {
+      console.log('🔧 [GamePage] Attempting to initialize contract service with burner wallet...')
       const provider = new ethers.BrowserProvider(burnerWallet.client)
       const config = {
         gameCoreAddress: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
         stateManagerAddress: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         proofVerifierAddress: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
       }
+      console.log('🔧 [GamePage] Burner wallet contract config:', config)
       initializeContractService(provider, config)
+    } else {
+      console.log('⚠️ [GamePage] Skipping burner wallet contract initialization:', {
+        reason: !burnerWallet ? 'No burner wallet' : 'Already initialized'
+      })
     }
   }, [burnerWallet, isContractInitialized, initializeContractService])
 
@@ -141,8 +168,9 @@ export default function GamePage() {
 
   if (!isInitialized) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-        <div className="card" style={{ maxWidth: '600px', width: '100%', margin: '0 16px' }}>
+      <>
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div className="card" style={{ maxWidth: '600px', width: '100%', margin: '0 16px' }}>
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-5xl font-bold text-gradient mb-4">
@@ -237,6 +265,20 @@ export default function GamePage() {
               />
             </div>
             
+            {/* Quick Access to Storage Manager */}
+            <div className="text-center">
+              <button
+                onClick={() => setShowStorage(true)}
+                className="btn btn-outline"
+                style={{ fontSize: '14px', padding: '8px 16px' }}
+              >
+                💾 Check Storage Manager
+              </button>
+              <div className="text-xs text-secondary mt-2">
+                View saved players, backups, or clear data
+              </div>
+            </div>
+            
             <button
               onClick={handleInitialize}
               disabled={!playerName.trim() || isLoading}
@@ -298,6 +340,9 @@ export default function GamePage() {
                 }}
               >
                 ⚠️ No saved player found for this wallet address
+                <div className="text-xs mt-1">
+                  Enter a player name below to create a new character, or check the Storage Manager for backups.
+                </div>
               </div>
             )}
           </div>
@@ -318,6 +363,51 @@ export default function GamePage() {
           )}
         </div>
       </div>
+      
+      {/* Storage Manager Modal for Initialization Screen */}
+      {showStorage && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px'
+          }}
+        >
+          <div 
+            style={{
+              background: 'rgba(17, 24, 39, 0.95)',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '800px',
+              width: '100%',
+              maxHeight: '80vh',
+              overflow: 'auto',
+              border: '1px solid rgba(75, 85, 99, 0.3)'
+            }}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-primary">💾 Storage Manager</h2>
+              <button
+                onClick={() => setShowStorage(false)}
+                className="btn btn-secondary"
+                style={{ padding: '8px 16px' }}
+              >
+                ✕ Close
+              </button>
+            </div>
+            <StorageManager />
+          </div>
+        </div>
+      )}
+      </>
     )
   }
 

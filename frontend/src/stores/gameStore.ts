@@ -120,7 +120,7 @@ const fixPlayerData = (player: any): PlayerState => {
     currency: typeof player.currency === 'number' ? player.currency : 1000,
     experience: typeof player.experience === 'number' ? player.experience : 0,
     reputation: typeof player.reputation === 'number' ? player.reputation : 1.0,
-    lastClaimTime: typeof player.lastClaimTime === 'number' ? player.lastClaimTime : Date.now(),
+    lastClaimTime: typeof player.lastClaimTime === 'number' ? player.lastClaimTime : Date.now() - 3600000,
     ownedStores: Array.isArray(player.ownedStores) ? player.ownedStores : [],
     exploredAreas: Array.isArray(player.exploredAreas) ? player.exploredAreas : [{ id: 1, type: 'street' }],
     nonce: typeof player.nonce === 'number' ? player.nonce : 0,
@@ -358,7 +358,7 @@ export const useGameStore = create<GameState & GameActions>()(
             currency: 1000,
             experience: 0,
             reputation: 1.0,
-            lastClaimTime: Date.now(),
+            lastClaimTime: Date.now() - 3600000, // Set to 1 hour ago so new players can claim immediately
             ownedStores: [],
             exploredAreas: [{ id: 1, type: 'street' }],
             nonce: 0,
@@ -370,7 +370,7 @@ export const useGameStore = create<GameState & GameActions>()(
           console.log('Store: Player created successfully:', initialPlayer)
           set({ 
             player: initialPlayer, 
-            isInitialized: true, 
+            isInitialized: true,
             isLoading: false 
           })
         } catch (error) {
@@ -598,21 +598,110 @@ export const useGameStore = create<GameState & GameActions>()(
       },
 
       claimRewards: async () => {
-        const { player } = get()
-        if (!player) return
+        console.log('🎯 [GameStore] claimRewards called')
+        const { player, isContractInitialized } = get()
+        if (!player) {
+          console.log('❌ [GameStore] No player found, returning')
+          return
+        }
 
+        console.log('✅ [GameStore] Player found:', player)
+        console.log('🔧 [GameStore] Contract service status:', {
+          isContractInitialized,
+          hasContractService: !!contractService,
+          contractServiceType: typeof contractService,
+          contractServiceConstructor: contractService?.constructor?.name,
+          contractServiceMethods: contractService ? Object.getOwnPropertyNames(Object.getPrototypeOf(contractService)) : 'No contract service'
+        })
+        
         set({ isLoading: true, error: null })
         try {
           const currentTime = Date.now()
           const timeElapsed = currentTime - player.lastClaimTime
           
-          if (timeElapsed < 3600000) { // 1 hour
-            throw new Error('Must wait at least 1 hour between claims')
+          console.log('⏰ [GameStore] Time check:', { currentTime, lastClaimTime: player.lastClaimTime, timeElapsed })
+          
+          // TEMPORARY: Reduce cooldown to 1 minute for testing
+          const COOLDOWN_TIME = 60000 // 1 minute instead of 1 hour
+          console.log('🧪 [GameStore] Using testing cooldown:', COOLDOWN_TIME / 1000, 'seconds')
+          
+          if (timeElapsed < COOLDOWN_TIME) {
+            const remainingSeconds = Math.ceil((COOLDOWN_TIME - timeElapsed) / 1000)
+            throw new Error(`Must wait at least ${remainingSeconds} seconds between claims (testing mode)`)
           }
 
           const hoursElapsed = timeElapsed / 3600000
           const reward = Math.floor(100 * hoursElapsed * player.reputation)
+          
+          console.log('💰 [GameStore] Calculating reward:', { hoursElapsed, reward, reputation: player.reputation })
 
+          // If contract is initialized, generate proof and submit to contract
+          if (isContractInitialized && contractService) {
+            console.log('🔐 [GameStore] Contract initialized - starting 2-phase claim process...')
+            
+            // PHASE 1: Generate Time Reward Proof
+            console.log('📋 [GameStore] ===== PHASE 1: GENERATING PROOF =====')
+            set({ proofGenerationProgress: 10, currentProofStep: 'Preparing proof inputs...' })
+            
+            // Prepare proof inputs
+            const proofInputs = {
+              playerId: player.playerId,
+              positionX: player.position.areaId, // Using areaId as position for now
+              positionY: 0, // Simplified for now
+              inventory: Object.values(player.inventory || {}),
+              currency: player.currency,
+              lastClaimTime: player.lastClaimTime,
+              ownedStores: player.ownedStores || [],
+              reputation: player.reputation,
+              experience: player.experience,
+              nonce: player.nonce,
+              exploredCells: player.exploredAreas?.map(area => area.id) || [],
+              currentTime: currentTime,
+              rewardAmount: reward
+            }
+
+            console.log('📋 [GameStore] Time reward proof inputs prepared:', proofInputs)
+            set({ proofGenerationProgress: 30, currentProofStep: 'Generating zero-knowledge proof...' })
+
+            // Generate proof
+            console.log('⚙️ [GameStore] Calling proofService.generateTimeRewardProof...')
+            const proof = await proofService.generateTimeRewardProof(proofInputs)
+            console.log('✅ [GameStore] PHASE 1 COMPLETE: Time reward proof generated successfully!')
+            set({ proofGenerationProgress: 50, currentProofStep: 'Proof generated, preparing transaction...' })
+
+            // PHASE 2: Submit to Contract (This should trigger MetaMask)
+            console.log('📡 [GameStore] ===== PHASE 2: SUBMITTING TO CONTRACT =====')
+            set({ proofGenerationProgress: 70, currentProofStep: 'Submitting proof to contract (MetaMask popup should appear)...' })
+            
+            console.log('📡 [GameStore] Calling contractService.submitTimeRewardProof...')
+            console.log('🔍 [GameStore] About to trigger MetaMask transaction...')
+            
+            const result = await contractService.submitTimeRewardProof(proof)
+            console.log('📊 [GameStore] PHASE 2 COMPLETE: Contract submission result:', result)
+            
+            if (!result.success) {
+              console.error('❌ [GameStore] Contract submission failed:', result.error)
+              throw new Error(result.error || 'Failed to submit time reward proof to contract')
+            }
+            
+            console.log('✅ [GameStore] CLAIM COMPLETE: Time reward proof submitted to contract successfully!')
+            console.log('🔗 [GameStore] Transaction hash:', result.hash)
+            set({ proofGenerationProgress: 100, currentProofStep: 'Transaction confirmed!' })
+          } else {
+            console.log('⚠️ [GameStore] Contract not initialized, updating local state only')
+            console.log('🔍 [GameStore] Contract initialization details:', {
+              isContractInitialized,
+              hasContractService: !!contractService,
+              contractServiceConstructor: contractService?.constructor?.name,
+              contractServiceMethods: contractService ? Object.getOwnPropertyNames(Object.getPrototypeOf(contractService)) : 'No contract service',
+              gameStoreState: {
+                isContractInitialized: get().isContractInitialized,
+                contractConfig: get().contractConfig
+              }
+            })
+          }
+
+          // Update player state
           set({
             player: {
               ...player,
@@ -622,7 +711,10 @@ export const useGameStore = create<GameState & GameActions>()(
             },
             isLoading: false,
           })
+          
+          console.log('Reward claimed successfully!')
         } catch (error) {
+          console.error('Error claiming rewards:', error)
           set({ 
             error: error instanceof Error ? error.message : 'Failed to claim rewards',
             isLoading: false 
@@ -857,13 +949,20 @@ export const useGameStore = create<GameState & GameActions>()(
       },
 
       initializeContractService: async (provider: any, config: ContractConfig) => {
+        console.log('🔧 [GameStore] Initializing contract service...', {
+          hasProvider: !!provider,
+          config,
+          providerType: typeof provider
+        })
         try {
           await contractService.initialize(provider, config)
+          console.log('✅ [GameStore] Contract service initialized successfully!')
           set({ 
             contractConfig: config, 
             isContractInitialized: true 
           })
         } catch (error) {
+          console.error('❌ [GameStore] Contract service initialization failed:', error)
           set({ 
             error: error instanceof Error ? error.message : 'Failed to initialize contract service',
             isContractInitialized: false 

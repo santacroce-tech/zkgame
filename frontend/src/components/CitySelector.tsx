@@ -127,6 +127,12 @@ export function CitySelector() {
     const city = AVAILABLE_CITIES.find(c => c.id === cityId)
     if (!city) return
 
+    // Check if player is already in this city
+    if (cityId === player.position.areaId) {
+      setError('You are already in this location!')
+      return
+    }
+
     // Check if we already have a proof for this city
     const hasProof = proofCache[cityId]
     
@@ -185,8 +191,12 @@ export function CitySelector() {
           >
             <option value="">Choose a destination...</option>
             {availableCities.map((city) => (
-              <option key={city.id} value={city.id}>
-                {city.name} {proofCache[city.id] ? '✓' : ''}
+              <option 
+                key={city.id} 
+                value={city.id}
+                disabled={city.id === player.position.areaId}
+              >
+                {city.name} {proofCache[city.id] ? '✓' : ''} {city.id === player.position.areaId ? '(Current)' : ''}
               </option>
             ))}
           </select>
@@ -243,6 +253,7 @@ export function CitySelector() {
         <div className="text-xs text-secondary">
           <div className="mb-1">💡 Travel Tips:</div>
           <div>• ✓ = Proof already cached (instant travel)</div>
+          <div>• (Current) = You're already here</div>
           <div>• New locations require proof generation</div>
           <div>• Higher level locations have requirements</div>
         </div>

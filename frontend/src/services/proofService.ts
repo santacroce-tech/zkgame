@@ -28,6 +28,31 @@ export interface MovementProof {
   publicSignals: [string, string, string] // [oldCommitment, newCommitment, timestamp]
 }
 
+export interface TimeRewardProofInputs {
+  playerId: string
+  positionX: number
+  positionY: number
+  inventory: number[]
+  currency: number
+  lastClaimTime: number
+  ownedStores: number[]
+  reputation: number
+  experience: number
+  nonce: number
+  exploredCells: number[]
+  currentTime: number
+  rewardAmount: number
+}
+
+export interface TimeRewardProof {
+  proof: {
+    pi_a: [string, string, string]
+    pi_b: [[string, string], [string, string], [string, string]]
+    pi_c: [string, string, string]
+  }
+  publicSignals: [string, string, string, string] // [oldCommitment, newCommitment, currentTime, rewardAmount]
+}
+
 export interface ProofGenerationStatus {
   isGenerating: boolean
   progress: number
@@ -39,6 +64,10 @@ class ProofService {
   private wasmPath = '/circuits/movement.wasm'
   private zkeyPath = '/circuits/movement_final.zkey'
   private vkeyPath = '/circuits/movement_verification_key.json'
+  
+  private timeRewardWasmPath = '/circuits/timeReward.wasm'
+  private timeRewardZkeyPath = '/circuits/timeReward_final.zkey'
+  private timeRewardVkeyPath = '/circuits/timeReward_verification_key.json'
 
   /**
    * Generate a movement proof
@@ -120,6 +149,98 @@ class ProofService {
   }
 
   /**
+   * Generate a time reward proof
+   */
+  async generateTimeRewardProof(inputs: TimeRewardProofInputs): Promise<TimeRewardProof> {
+    try {
+      console.log('🔍 [ProofService] Starting time reward proof generation...')
+      console.log('📥 [ProofService] Input data:', {
+        playerId: inputs.playerId,
+        position: { x: inputs.positionX, y: inputs.positionY },
+        currency: inputs.currency,
+        lastClaimTime: inputs.lastClaimTime,
+        currentTime: inputs.currentTime,
+        rewardAmount: inputs.rewardAmount,
+        reputation: inputs.reputation
+      })
+      
+      // Prepare inputs for the circuit
+      console.log('⚙️ [ProofService] Preparing circuit inputs...')
+      const circuitInputs = this.prepareTimeRewardInputs(inputs)
+      console.log('📋 [ProofService] Circuit inputs prepared:', {
+        playerId: circuitInputs.playerId,
+        position: { x: circuitInputs.positionX, y: circuitInputs.positionY },
+        currency: circuitInputs.currency,
+        lastClaimTime: circuitInputs.lastClaimTime,
+        currentTime: circuitInputs.currentTime,
+        rewardAmount: circuitInputs.rewardAmount,
+        totalInputs: Object.keys(circuitInputs).length
+      })
+      
+      // Generate the proof using snarkjs
+      console.log('🔧 [ProofService] Generating proof with snarkjs...')
+      console.log('📁 [ProofService] Using files:', {
+        wasm: this.timeRewardWasmPath,
+        zkey: this.timeRewardZkeyPath
+      })
+      
+      const { proof, publicSignals } = await groth16.fullProve(
+        circuitInputs, 
+        this.timeRewardWasmPath, 
+        this.timeRewardZkeyPath
+      )
+      
+      console.log('✅ [ProofService] Time reward proof generated successfully!')
+      console.log('📊 [ProofService] Public signals:', {
+        length: publicSignals.length,
+        signals: publicSignals
+      })
+      console.log('🔐 [ProofService] Proof structure:', {
+        pi_a_length: proof.pi_a.length,
+        pi_b_length: proof.pi_b.length,
+        pi_c_length: proof.pi_c.length,
+        pi_a: proof.pi_a,
+        pi_b: proof.pi_b,
+        pi_c: proof.pi_c
+      })
+      
+      // Validate that we have exactly 4 public signals as expected by the contract
+      const expectedPublicSignalsLength = 4
+      if (publicSignals.length !== expectedPublicSignalsLength) {
+        console.error(`❌ [ProofService] Time reward proof has wrong number of public signals!`, {
+          expected: expectedPublicSignalsLength,
+          actual: publicSignals.length,
+          publicSignals: publicSignals
+        })
+        throw new Error(`Time reward proof generated ${publicSignals.length} public signals, but contract expects ${expectedPublicSignalsLength}`)
+      }
+      
+      const result = {
+        proof: {
+          pi_a: proof.pi_a,
+          pi_b: proof.pi_b,
+          pi_c: proof.pi_c
+        },
+        publicSignals: publicSignals as [string, string, string, string]
+      }
+      
+      console.log('📤 [ProofService] Returning time reward proof result:', {
+        publicSignalsLength: result.publicSignals.length,
+        publicSignals: result.publicSignals
+      })
+      
+      return result
+    } catch (error) {
+      console.error('❌ [ProofService] Time reward proof generation failed:', error)
+      console.error('📋 [ProofService] Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      })
+      throw new Error(`Failed to generate time reward proof: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
    * Verify a movement proof
    */
   async verifyMovementProof(proof: MovementProof): Promise<boolean> {
@@ -196,6 +317,108 @@ class ProofService {
     })
 
     return circuitInputs
+  }
+
+  /**
+   * Prepare inputs for the time reward circuit
+   */
+  private prepareTimeRewardInputs(inputs: TimeRewardProofInputs) {
+    // Pad arrays to required sizes
+    const inventory = this.padArray(inputs.inventory, 64, 0)
+    const ownedStores = this.padArray(inputs.ownedStores, 10, 0)
+    const exploredCells = this.padArray(inputs.exploredCells, 1000, 0)
+
+    const circuitInputs = {
+      // Private inputs - single values
+      playerId: Number(inputs.playerId),
+      positionX: Number(inputs.positionX),
+      positionY: Number(inputs.positionY),
+      currency: Number(inputs.currency),
+      lastClaimTime: Number(inputs.lastClaimTime),
+      reputation: Number(inputs.reputation),
+      experience: Number(inputs.experience),
+      nonce: Number(inputs.nonce),
+      currentTime: Number(inputs.currentTime),
+      
+      // Private inputs - arrays
+      inventory: inventory.map(Number),
+      ownedStores: ownedStores.map(Number),
+      exploredCells: exploredCells.map(Number)
+    }
+
+    // Debug logging to see the exact structure
+    console.log('🔍 [ProofService] Detailed time reward circuit input structure:')
+    console.log('  Single values:', {
+      playerId: circuitInputs.playerId,
+      positionX: circuitInputs.positionX,
+      positionY: circuitInputs.positionY,
+      currency: circuitInputs.currency,
+      lastClaimTime: circuitInputs.lastClaimTime,
+      reputation: circuitInputs.reputation,
+      experience: circuitInputs.experience,
+      nonce: circuitInputs.nonce,
+      currentTime: circuitInputs.currentTime
+    })
+    console.log('  Array lengths:', {
+      inventory: circuitInputs.inventory.length,
+      ownedStores: circuitInputs.ownedStores.length,
+      exploredCells: circuitInputs.exploredCells.length
+    })
+    
+    // Count total inputs
+    const totalInputs = 9 + circuitInputs.inventory.length + circuitInputs.ownedStores.length + circuitInputs.exploredCells.length
+    console.log('📊 [ProofService] Total input count:', totalInputs)
+    console.log('📋 [ProofService] All circuit inputs:', circuitInputs)
+
+    return circuitInputs
+  }
+
+  /**
+   * Compute state commitment for time reward circuit
+   */
+  private computeTimeRewardStateCommitment(inputs: TimeRewardProofInputs, isNew: boolean): string {
+    // Compute inventory hash (sum of all inventory values)
+    const inventoryHash = inputs.inventory.reduce((sum, val) => sum + val, 0)
+    
+    // Compute stores hash (sum of all owned stores)
+    const storesHash = inputs.ownedStores.reduce((sum, val) => sum + val, 0)
+    
+    // Compute explored hash (sum of all explored cells)
+    const exploredHash = inputs.exploredCells.reduce((sum, val) => sum + val, 0)
+    
+    // Create input array exactly as the circuit does
+    const inputs_array = [
+      Number(inputs.playerId),
+      inputs.positionX,
+      inputs.positionY,
+      isNew ? inputs.currency + inputs.rewardAmount : inputs.currency,
+      isNew ? inputs.currentTime : inputs.lastClaimTime,
+      inputs.reputation,
+      inputs.experience,
+      isNew ? inputs.nonce + 1 : inputs.nonce,
+      inventoryHash,
+      storesHash,
+      exploredHash,
+      inputs.currentTime
+    ]
+    
+    // Use the same hash function as the circuit with modular arithmetic
+    const FIELD_SIZE = BigInt('21888242871839275222246405745257275088548364400416034343698204186575808495617')
+    
+    let hash = BigInt(0)
+    let multiplier = BigInt(1)
+    
+    for (let i = 0; i < inputs_array.length; i++) {
+      const contribution = BigInt(inputs_array[i]) * multiplier
+      hash = (hash + contribution) % FIELD_SIZE
+      multiplier = (multiplier * BigInt(31)) % FIELD_SIZE
+    }
+    
+    // Add non-linearity exactly as the circuit does
+    hash = (hash * hash + hash) % FIELD_SIZE
+    
+    // Convert to hex string to match circuit output format
+    return '0x' + hash.toString(16).padStart(64, '0')
   }
 
   /**
