@@ -38,39 +38,39 @@ template TimeRewardProof() {
     var EXPLORED_SIZE = 1000;
     
     // Verify old state commitment
-    component oldStateHasher = Poseidon(12);
-    oldStateHasher.in[0] <== playerId;
-    oldStateHasher.in[1] <== positionX;
-    oldStateHasher.in[2] <== positionY;
-    oldStateHasher.in[3] <== currency;
-    oldStateHasher.in[4] <== lastClaimTime;
-    oldStateHasher.in[5] <== reputation;
-    oldStateHasher.in[6] <== experience;
-    oldStateHasher.in[7] <== nonce;
+    component oldStateHasher = PoseidonHash(12);
+    oldStateHasher.inputs[0] <== playerId;
+    oldStateHasher.inputs[1] <== positionX;
+    oldStateHasher.inputs[2] <== positionY;
+    oldStateHasher.inputs[3] <== currency;
+    oldStateHasher.inputs[4] <== lastClaimTime;
+    oldStateHasher.inputs[5] <== reputation;
+    oldStateHasher.inputs[6] <== experience;
+    oldStateHasher.inputs[7] <== nonce;
     
     // Hash inventory
     var inventoryHash = 0;
     for (var i = 0; i < INVENTORY_SIZE; i++) {
         inventoryHash += inventory[i];
     }
-    oldStateHasher.in[8] <== inventoryHash;
+    oldStateHasher.inputs[8] <== inventoryHash;
     
     // Hash owned stores
     var storesHash = 0;
     for (var i = 0; i < STORES_SIZE; i++) {
         storesHash += ownedStores[i];
     }
-    oldStateHasher.in[9] <== storesHash;
+    oldStateHasher.inputs[9] <== storesHash;
     
     // Hash explored cells
     var exploredHash = 0;
     for (var i = 0; i < EXPLORED_SIZE; i++) {
         exploredHash += exploredCells[i];
     }
-    oldStateHasher.in[10] <== exploredHash;
+    oldStateHasher.inputs[10] <== exploredHash;
     
     // Add current time
-    oldStateHasher.in[11] <== currentTime;
+    oldStateHasher.inputs[11] <== currentTime;
     
     // Store the computed old state commitment
     oldStateCommitment = oldStateHasher.out;
@@ -96,19 +96,19 @@ template TimeRewardProof() {
     var updatedNonce = nonce + 1;
     
     // Compute new state commitment
-    component newStateHasher = Poseidon(12);
-    newStateHasher.in[0] <== playerId;
-    newStateHasher.in[1] <== positionX;
-    newStateHasher.in[2] <== positionY;
-    newStateHasher.in[3] <== updatedCurrency;
-    newStateHasher.in[4] <== updatedLastClaimTime;
-    newStateHasher.in[5] <== reputation;
-    newStateHasher.in[6] <== experience;
-    newStateHasher.in[7] <== updatedNonce;
-    newStateHasher.in[8] <== inventoryHash;
-    newStateHasher.in[9] <== storesHash;
-    newStateHasher.in[10] <== exploredHash;
-    newStateHasher.in[11] <== currentTime;
+    component newStateHasher = PoseidonHash(12);
+    newStateHasher.inputs[0] <== playerId;
+    newStateHasher.inputs[1] <== positionX;
+    newStateHasher.inputs[2] <== positionY;
+    newStateHasher.inputs[3] <== updatedCurrency;
+    newStateHasher.inputs[4] <== updatedLastClaimTime;
+    newStateHasher.inputs[5] <== reputation;
+    newStateHasher.inputs[6] <== experience;
+    newStateHasher.inputs[7] <== updatedNonce;
+    newStateHasher.inputs[8] <== inventoryHash;
+    newStateHasher.inputs[9] <== storesHash;
+    newStateHasher.inputs[10] <== exploredHash;
+    newStateHasher.inputs[11] <== currentTime;
     
     // Store the computed new state commitment
     newStateCommitment = newStateHasher.out;
